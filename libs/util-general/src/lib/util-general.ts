@@ -1,6 +1,7 @@
 import * as Validator from 'yup';
 import { stringify } from 'qs';
 import { isPossiblePhoneNumber } from 'react-phone-number-input';
+import { EffectCallback, useEffect } from 'react';
 
 // warn when a context is used by not defined/set
 export function normalizeNumber(
@@ -49,4 +50,14 @@ export function queryToSearch(
   options: qs.IStringifyOptions = {}
 ): string {
   return stringify(query, { addQueryPrefix: true, ...options });
+}
+
+function useEffectOnce(effect: EffectCallback) {
+  useEffect(effect, [effect]);
+}
+
+export function useMount(fn: () => void) {
+  useEffectOnce(() => {
+    fn();
+  });
 }

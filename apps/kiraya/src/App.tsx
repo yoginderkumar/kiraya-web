@@ -9,10 +9,13 @@ import {
   StorageProvider,
   useFirebaseApp,
 } from 'reactfire';
-import { AppLayout } from './AppLayout';
+import { AppLayout, DashboardLayout } from './AppLayout';
 import { ProtectedRoute } from './Auth';
+import AddProduct from './pages/AddProduct';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
+import YourProduct from './pages/YourProduct';
+import YourProducts from './pages/YourProducts';
 
 function App() {
   const app = useFirebaseApp();
@@ -25,17 +28,23 @@ function App() {
         <AuthProvider sdk={auth}>
           <Routes>
             <Route path="/" element={<AppLayout />}>
-              <Route path="/" element={<Home />} />
-            </Route>
-            <Route path="/profile" element={<AppLayout />}>
+              <Route path="/home" element={<Home />} />
               <Route
-                path=""
+                path="/profile"
                 element={
                   <ProtectedRoute>
-                    <Profile />
+                    <DashboardLayout />
                   </ProtectedRoute>
                 }
-              />
+              >
+                <Route path="your-products">
+                  <Route path="" element={<YourProducts />} />
+                  <Route path=":productId" element={<YourProduct />} />
+                  <Route path="add-product" element={<AddProduct />} />
+                </Route>
+                <Route path="" element={<Profile />} />
+              </Route>
+              <Route path="" element={<Home />} />
             </Route>
           </Routes>
         </AuthProvider>

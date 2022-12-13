@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@kiraya/data-store/auth": ["libs/data-store/auth/src/index.ts"],
+      "@kiraya/data-store/products": ["libs/data-store/products/src/index.ts"],
       "@kiraya/data-store/users": ["libs/data-store/users/src/index.ts"],
       "@kiraya/kiraya-ui": ["libs/kiraya-ui/src/index.ts"],
       "@kiraya/util-dates": ["libs/util-dates/src/index.ts"],

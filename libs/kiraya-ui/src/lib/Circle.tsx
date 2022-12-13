@@ -1,23 +1,33 @@
-import React from 'react';
-import { Box } from './Box';
-import { COLORS, SIZES } from './css/theme';
+import React, { ElementType, ForwardedRef, forwardRef } from 'react';
+import {
+  PolymorphicForwardRefExoticComponent,
+  PolymorphicPropsWithoutRef,
+  PolymorphicPropsWithRef,
+} from 'react-polymorphic-types';
+import { Box, BoxOwnProps } from './Box';
 
-export function Circle({
-  size,
-  color,
-  children,
-  backgroundColor,
-}: {
-  size?: keyof typeof SIZES;
-  color?: keyof typeof COLORS;
-  backgroundColor?: keyof typeof COLORS;
+const DefaultElement = 'div';
+
+export type CircleOwnProps = Omit<BoxOwnProps, 'display'> & {
   children?: React.ReactNode;
-}) {
-  const defaultSize = size || '12';
-  const defaultColor = color || 'blue900';
-  const defaultBgColor = backgroundColor || 'blue100';
+};
+
+export type CircleProps<T extends React.ElementType = typeof DefaultElement> =
+  PolymorphicPropsWithRef<CircleOwnProps, T>;
+
+export const Circle: PolymorphicForwardRefExoticComponent<
+  CircleOwnProps,
+  typeof DefaultElement
+> = forwardRef(function Stack<T extends ElementType = typeof DefaultElement>(
+  { as, ...restProps }: PolymorphicPropsWithoutRef<CircleOwnProps, T>,
+  ref: ForwardedRef<Element>
+) {
+  const Element: ElementType = as || DefaultElement;
+  const defaultSize = restProps.size || '12';
+  const defaultColor = restProps.color || 'blue900';
+  const defaultBgColor = restProps.backgroundColor || 'blue100';
   return (
-    <Box>
+    <Element {...restProps}>
       <Box
         width={defaultSize}
         height={defaultSize}
@@ -27,9 +37,10 @@ export function Circle({
         justifyContent="center"
         color={defaultColor}
         backgroundColor={defaultBgColor}
+        {...restProps}
       >
-        {children}
+        {restProps.children}
       </Box>
-    </Box>
+    </Element>
   );
-}
+});

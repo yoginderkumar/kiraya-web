@@ -10,4 +10,5 @@ export * from './lib/Stack';
 export * from './lib/Button';
 export * from './lib/Circle';
 export * from './lib/Inline';
+export * from './lib/Select';
 export * from './lib/PhoneInput';
