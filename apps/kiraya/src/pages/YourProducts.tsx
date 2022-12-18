@@ -23,14 +23,20 @@ export default function YourProducts() {
                 Your Products
               </Text>
               {products.length ? (
-                <Inline gap="6">
+                <Inline gap="6" as="ul" flexWrap="wrap">
                   {products.map((product) => {
                     return (
-                      <ProductCard
-                        product={product}
+                      <Box
                         key={product.uid}
-                        onProductClick={(prodId) => navigate(prodId)}
-                      />
+                        as="li"
+                        className="w-[30%] hover:shadow-2xl hover:rounded-lg"
+                        rounded="md"
+                      >
+                        <ProductCard
+                          product={product}
+                          onProductClick={(prodId) => navigate(prodId)}
+                        />
+                      </Box>
                     );
                   })}
                 </Inline>

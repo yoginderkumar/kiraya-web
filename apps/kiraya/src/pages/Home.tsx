@@ -1,129 +1,71 @@
-import { Box, Heading, Inline, Stack, Text } from '@kiraya/kiraya-ui';
+import { useProductsForHomeUsers } from '@kiraya/data-store/products';
+import {
+  ArrowRightIcon,
+  Box,
+  Button,
+  Heading,
+  Inline,
+  Stack,
+  Text,
+} from '@kiraya/kiraya-ui';
 import React from 'react';
-
-const DATA = [
-  {
-    id: 'one',
-    title: 'Guitar',
-    description: 'Guitar for sale',
-    ownerInfo: { id: 'abhishek', name: 'Abhishek' },
-    tags: ['guitar', 'music'],
-    category: { id: 'music', title: 'Music' },
-    metaData: {
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    viewCount: 14,
-    duration: [3, 6, 9, 12],
-    availability: false,
-    productAssets: [
-      'https://i.pinimg.com/1200x/fa/96/6f/fa966f2794f277078e9f0379efdfb1bc.jpg',
-    ],
-  },
-  {
-    id: 'two',
-    title: 'Guitar',
-    description: 'Guitar forknascbjbdihvduvuydwvu sale',
-    ownerInfo: { id: 'abhishek', name: 'Abhishek' },
-    tags: ['guitar', 'music'],
-    category: { id: 'music', title: 'Music' },
-    metaData: {
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    viewCount: 14,
-    duration: [3, 6, 9, 12],
-    availability: false,
-    productAssets: [
-      'https://i.pinimg.com/1200x/fa/96/6f/fa966f2794f277078e9f0379efdfb1bc.jpg',
-    ],
-  },
-  {
-    id: 'three',
-    title: 'Guitar',
-    description: 'Guitar forknascbjbdihvduvuydwvu sale',
-    ownerInfo: { id: 'abhishek', name: 'Abhishek' },
-    tags: ['guitar', 'music'],
-    category: { id: 'music', title: 'Music' },
-    metaData: {
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    viewCount: 14,
-    duration: [3, 6, 9, 12],
-    availability: false,
-    productAssets: [
-      'https://i.pinimg.com/1200x/fa/96/6f/fa966f2794f277078e9f0379efdfb1bc.jpg',
-    ],
-  },
-  {
-    id: 'four',
-    title: 'Guitar',
-    description: 'Guitar forknascbjbdihvduvuydwvu sale',
-    ownerInfo: { id: 'abhishek', name: 'Abhishek' },
-    tags: ['guitar', 'music'],
-    category: { id: 'music', title: 'Music' },
-    metaData: {
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    viewCount: 14,
-    duration: [3, 6, 9, 12],
-    availability: false,
-    productAssets: [
-      'https://i.pinimg.com/1200x/fa/96/6f/fa966f2794f277078e9f0379efdfb1bc.jpg',
-    ],
-  },
-  {
-    id: 'five',
-    title: 'Guitar',
-    description: 'Guitar forknascbjbdihvduvuydwvu jhcguyduyg sale',
-    ownerInfo: { id: 'abhishek', name: 'Abhishek' },
-    tags: ['guitar', 'music'],
-    category: { id: 'music', title: 'Music' },
-    metaData: {
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    viewCount: 14,
-    duration: [3, 6, 9, 12],
-    availability: false,
-    productAssets: [
-      'https://i.pinimg.com/1200x/fa/96/6f/fa966f2794f277078e9f0379efdfb1bc.jpg',
-    ],
-  },
-];
+import { ProductCard, SkeletonProductCard } from '../Products/Products';
 
 export default function Home() {
+  const { isLoading, popularProducts } = useProductsForHomeUsers();
+
+  console.log('products:', popularProducts);
+
   return (
-    <Box paddingX="12" paddingY="4">
-      {DATA.length ? (
-        <Stack gap="3">
+    <Box
+      maxWidth="full"
+      overflowX="hidden"
+      minWidth="full"
+      paddingX="12"
+      paddingY="4"
+      backgroundColor="white"
+    >
+      <Stack gap="3" paddingBottom="6">
+        <Inline justifyContent="between" alignItems="center">
           <Heading as="h3" fontSize="lg" fontWeight="semibold">
             Popular
           </Heading>
-          <Inline as="ul" alignItems="center" gap="6">
-            {DATA.map((item) => (
-              <Stack
-                backgroundColor="gray100"
-                rounded="md"
-                key={item.id}
-                className="h-80 w-60"
-              >
-                <img
-                  src={item.productAssets[0]}
-                  alt={item.title}
-                  className="rounded-t-md h-[200px]"
-                />
-                <Stack padding="4">
-                  <Text>{item.title}</Text>
-                  {item.description}
-                </Stack>
-              </Stack>
-            ))}
-          </Inline>
-        </Stack>
-      ) : null}
+          <Button inline>
+            <Inline alignItems="center">
+              <Text fontSize="base">See All</Text>
+              <ArrowRightIcon />
+            </Inline>
+          </Button>
+        </Inline>
+        <Inline as="ul" alignItems="center" className="overflow-x-auto" gap="6">
+          {isLoading
+            ? [1, 2, 3].map((item) => (
+                <Box
+                  key={item}
+                  as="li"
+                  className="w-full max-w-xs hover:shadow-2xl hover:rounded-lg"
+                  rounded="md"
+                >
+                  <SkeletonProductCard />
+                </Box>
+              ))
+            : popularProducts.length
+            ? popularProducts.map((product) => (
+                <Box
+                  key={product.uid}
+                  as="li"
+                  className="w-full max-w-xs hover:shadow-2xl hover:rounded-lg"
+                  rounded="md"
+                >
+                  <ProductCard
+                    product={product}
+                    onProductClick={(prodId) => console.log(prodId)}
+                  />
+                </Box>
+              ))
+            : null}
+        </Inline>
+      </Stack>
     </Box>
   );
 }

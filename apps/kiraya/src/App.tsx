@@ -9,6 +9,8 @@ import {
   StorageProvider,
   useFirebaseApp,
 } from 'reactfire';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import { AppLayout, DashboardLayout } from './AppLayout';
 import { ProtectedRoute } from './Auth';
 import AddProduct from './pages/AddProduct';

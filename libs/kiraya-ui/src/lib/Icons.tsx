@@ -124,6 +124,17 @@ export function ArrowLeftIcon(props: IconProps) {
   );
 }
 
+export function ArrowRightIcon(props: IconProps) {
+  return (
+    <Icon {...props} viewBox="0 0 24 24" fill="currentColor">
+      <path
+        fill="currentColor"
+        d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
+      />
+    </Icon>
+  );
+}
+
 export function CancelIcon(props: IconProps) {
   return (
     <Icon {...props} viewBox="0 0 20 20" fill="currentColor">
@@ -420,6 +431,36 @@ export function MailIcon(props: IconProps) {
         strokeLinejoin="round"
         strokeWidth={2}
         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      />
+    </Icon>
+  );
+}
+
+export function DocumentDownloadIcon(props: IconProps) {
+  return (
+    <Icon {...props} fill="currentColor" viewBox="0 0 24 24" stroke="none">
+      <path d="M18 15V18H6V15H4V18C4 19.1 4.9 20 6 20H18C19.1 20 20 19.1 20 18V15H18ZM17 11L15.59 9.59L13 12.17V4H11V12.17L8.41 9.59L7 11L12 16L17 11Z" />
+    </Icon>
+  );
+}
+
+export function AddImageIcon(props: IconProps) {
+  return (
+    <Icon {...props} fill="currentColor" viewBox="0 0 24 24">
+      <path
+        fill="currentColor"
+        d="M13 19C13 19.7 13.13 20.37 13.35 21H5C3.9 21 3 20.11 3 19V5C3 3.9 3.9 3 5 3H19C20.11 3 21 3.9 21 5V13.35C20.37 13.13 19.7 13 19 13V5H5V19H13M13.96 12.29L11.21 15.83L9.25 13.47L6.5 17H13.35C13.75 15.88 14.47 14.91 15.4 14.21L13.96 12.29M20 18V15H18V18H15V20H18V23H20V20H23V18H20Z"
+      />
+    </Icon>
+  );
+}
+
+export function ResetIcon(props: IconProps) {
+  return (
+    <Icon {...props} fill="currentColor" viewBox="0 0 24 24">
+      <path
+        fill="currentColor"
+        d="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.2 10.9,19.9L11.4,17.9C13.1,18.1 14.9,17.5 16.2,16.2C18.5,13.9 18.5,10.1 16.2,7.7C15.1,6.6 13.5,6 12,6V10.6L7,5.6L12,0.6V4M6.3,17.6C3.7,15 3.3,11 5.1,7.9L6.6,9.4C5.5,11.6 5.9,14.4 7.8,16.2C8.3,16.7 8.9,17.1 9.6,17.4L9,19.4C8,19 7.1,18.4 6.3,17.6Z"
       />
     </Icon>
   );

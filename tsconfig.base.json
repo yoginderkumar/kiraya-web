@@ -20,7 +20,8 @@
       "@kiraya/data-store/users": ["libs/data-store/users/src/index.ts"],
       "@kiraya/kiraya-ui": ["libs/kiraya-ui/src/index.ts"],
       "@kiraya/util-dates": ["libs/util-dates/src/index.ts"],
-      "@kiraya/util-general": ["libs/util-general/src/index.ts"]
+      "@kiraya/util-general": ["libs/util-general/src/index.ts"],
+      "@kiraya/util-logging": ["libs/util-logging/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

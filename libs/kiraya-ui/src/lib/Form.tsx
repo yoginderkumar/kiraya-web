@@ -10,10 +10,14 @@ import {
   getIn,
   useField,
 } from 'formik';
-import React, { useState } from 'react';
+import React, { SyntheticEvent, useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { $PropertyType } from 'utility-types';
+import { Box } from './Box';
 import { Button, getButtonClassName } from './Button';
+import { Circle } from './Circle';
 import {
+  AddImageIcon,
   ArrowLeftIcon,
   CameraIcon,
   CancelIcon,
@@ -21,7 +25,10 @@ import {
   PencilIcon,
   TrashIcon,
 } from './Icons';
+import { Inline } from './Inline';
 import { Modal, ModalBody, ModalFooter, useOverlayTriggerState } from './Modal';
+import { Stack } from './Stack';
+import { Text } from './Text';
 import { readFileAsDataURL } from './util';
 
 export const Input = React.forwardRef<
@@ -249,13 +256,16 @@ export function FormImageFileField({
   onRemove,
   onSelectionStart,
   onPreview,
+  previewClassName,
   ...props
 }: FormFieldProps & {
   onRemove?: () => void;
   // Callback to handle the first image selection
   onSelectionStart?: () => void;
   onPreview?: () => void;
+  previewClassName?: string;
 }) {
+  const [mediaName, setMediaName] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   // we need to keep this state because we want to show outlines on the labels
   // :focus-within can not be used because the input is outside of the the label
@@ -293,6 +303,10 @@ export function FormImageFileField({
                   field.name,
                   props.multiple ? files || [] : files ? files[0] : ''
                 );
+                if (files?.length) {
+                  const name = files[0].name;
+                  setMediaName(name);
+                }
                 setFileName(value);
                 if (files && files.length) {
                   readFileAsDataURL(files[0]).then((dataUrl) => {
@@ -320,14 +334,14 @@ export function FormImageFileField({
                   <img
                     src={dataUrl}
                     alt="Preview"
-                    className="w-12 h-12 cursor-pointer"
+                    className={`w-12 h-12 cursor-pointer ${previewClassName}`}
                     onClick={() => {
                       imagePreviewState.open();
                       onPreview?.();
                     }}
                   />
                   <Modal
-                    title="Bill"
+                    title={mediaName}
                     isOpen={imagePreviewState.isOpen}
                     onClose={imagePreviewState.close}
                   >
@@ -351,7 +365,7 @@ export function FormImageFileField({
                         fieldId={id}
                         className={getButtonClassName({ size: 'lg' })}
                       >
-                        <PencilIcon /> Change
+                        <PencilIcon />
                       </InputLabel>
                     </ModalFooter>
                   </Modal>
@@ -362,7 +376,7 @@ export function FormImageFileField({
                     'block ring-2 ring-blue-900': fileInputFocused,
                   })}
                 >
-                  <PencilIcon /> Change
+                  <PencilIcon />
                 </label>
                 <div className="border-l pl-4 flex items-center">
                   <Button
@@ -371,11 +385,12 @@ export function FormImageFileField({
                     onClick={() => {
                       form.setFieldValue(field.name, '');
                       setFileName('');
+                      setMediaName('');
                       setFileDataUrl(undefined);
                       onRemove?.();
                     }}
                   >
-                    <TrashIcon /> Delete
+                    <TrashIcon />
                   </Button>
                 </div>
               </div>
@@ -383,6 +398,263 @@ export function FormImageFileField({
           </div>
         );
       }}
+    />
+  );
+}
+
+export function FormMediaFileField({
+  ref,
+  imageFiles,
+  defaultValue,
+  maxMediaFiles,
+  onSelectionStart,
+  ...props
+}: FormFieldProps & {
+  defaultValue?: string;
+  maxMediaFiles?: number;
+  imageFiles: File[];
+  onSelectionStart?: () => void;
+}) {
+  const id = props.id || props.name;
+  const [multiples, setMultiples] = useState<File[]>([]);
+  const [updatingMedia, setUpdatingMedia] = useState<number | null>(null);
+  const [previewFile, setPreviewFile] = useState<{
+    file: File;
+    index: number;
+  } | null>(null);
+  const [dataUrl, setFileDataUrl] = useState<string | undefined>(
+    defaultValue ? String(defaultValue) : undefined
+  );
+
+  useEffect(() => {
+    if (previewFile !== null) {
+      readFileAsDataURL(previewFile.file).then((dataUrl) => {
+        setFileDataUrl(dataUrl as string);
+      });
+    }
+  }, [previewFile]);
+
+  useEffect(() => {
+    if (!imageFiles.length) {
+      setMultiples([]);
+    }
+  }, [imageFiles.length]);
+
+  const imagePreviewState = useOverlayTriggerState({ defaultOpen: false });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [fileInputFocused, setFileInputFocusState] = useState<boolean>(false);
+  const filesUpto = useMemo(() => {
+    return maxMediaFiles || 1;
+  }, [maxMediaFiles]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [{ value }, meta, { setValue }] = useField<File[]>(props.name);
+
+  function deleteMedia(index: number) {
+    const updatedFiles = multiples.filter((_, i) => i !== index);
+    setMultiples(updatedFiles);
+    setValue(updatedFiles);
+  }
+
+  return (
+    <FormField
+      {...props}
+      renderInput={({ field, form }) => (
+        <Box rounded="lg" borderWidth="1" width="full" padding="4">
+          <input
+            accept="image/png, image/jpeg, image/jpg"
+            {...props}
+            name={`file_name_${id}`}
+            type="file"
+            id={id}
+            multiple={updatingMedia === null ? true : false}
+            disabled={multiples.length === filesUpto}
+            className="opacity-0 absolute top-0 left-0 w-1 h-2"
+            onFocus={() => {
+              setFileInputFocusState(true);
+            }}
+            onBlur={() => {
+              setFileInputFocusState(false);
+              form.setFieldTouched(field.name, true);
+            }}
+            onChange={({ currentTarget: { value, files } }) => {
+              form.setFieldTouched(field.name, true);
+              const numOfFiles = files?.length || 0;
+              if (numOfFiles > filesUpto) {
+                toast.error(`Only ${filesUpto} media can be uploaded at once.`);
+                return;
+              }
+              if (files) {
+                if (multiples.length + numOfFiles > filesUpto) {
+                  toast.error(
+                    `Only ${filesUpto} media can be uploaded at once.`
+                  );
+                  return;
+                }
+                const filesConverted = Object.values(files);
+                if (updatingMedia != null) {
+                  const updatedFiles = multiples.map((file, index) => {
+                    if (updatingMedia === index) {
+                      return filesConverted[0];
+                    }
+                    return file;
+                  });
+                  setMultiples(updatedFiles);
+                  setUpdatingMedia(null);
+                  return;
+                }
+                setMultiples((prevMultiples) =>
+                  prevMultiples.length === filesUpto
+                    ? [...prevMultiples]
+                    : [...prevMultiples, ...filesConverted]
+                );
+                form.setFieldValue(field.name, [
+                  ...multiples,
+                  ...filesConverted,
+                ]);
+              }
+            }}
+          />
+          <Stack gap="4">
+            <InputLabel
+              fieldId={id}
+              onClick={() => {
+                onSelectionStart?.();
+              }}
+            >
+              <Box
+                id={id}
+                rounded="lg"
+                paddingY="12"
+                paddingX="8"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                borderWidth="2"
+                borderColor="blue200"
+                minHeight="full"
+                className="border-dashed"
+                cursor="pointer"
+                backgroundColor={
+                  multiples.length === filesUpto ? 'gray100' : undefined
+                }
+              >
+                <Stack alignItems="center" gap="4" justifyContent="center">
+                  <Box>
+                    <AddImageIcon color="gray500" size="8" />
+                  </Box>
+                  <Stack textAlign="center" gap="2">
+                    <Text fontWeight="semibold" color="gray500">
+                      Drop your image here, or{' '}
+                      <Text as="span" color="blue900">
+                        Browse
+                      </Text>
+                    </Text>
+                    <Text color="gray500" fontSize="sm">
+                      We support only JPG, JPEG or PNG formats
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Box>
+            </InputLabel>
+            <Modal
+              title={previewFile?.file.name || ''}
+              isOpen={previewFile !== null && imagePreviewState.isOpen}
+              onClose={imagePreviewState.close}
+            >
+              <ModalBody>
+                <img
+                  src={dataUrl}
+                  alt="Preview"
+                  className="w-full h-full max-w-full"
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  onClick={imagePreviewState.close}
+                  level="primary"
+                  autoFocus
+                  size="lg"
+                >
+                  Ok
+                </Button>
+              </ModalFooter>
+            </Modal>
+            {multiples.length ? (
+              <Stack
+                as="ul"
+                gap="3"
+                onChange={(e: SyntheticEvent) => {
+                  e.stopPropagation();
+                }}
+              >
+                {multiples.map((file, index) => (
+                  <Box
+                    key={`image_${file.name}_${index}`}
+                    borderWidth="1"
+                    rounded="lg"
+                    paddingX="3"
+                    paddingY="2"
+                  >
+                    <Inline alignItems="center" justifyContent="between">
+                      <Box
+                        className="w-2/3"
+                        cursor="pointer"
+                        onClick={() => {
+                          setPreviewFile({ file, index });
+                          imagePreviewState.open();
+                        }}
+                      >
+                        <Stack>
+                          <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            className="truncate"
+                          >
+                            {file.name}
+                          </Text>
+                          <Button inline align="left">
+                            <Text
+                              fontWeight="semibold"
+                              fontSize="sm"
+                              color="blue900"
+                            >
+                              Click to preview
+                            </Text>
+                          </Button>
+                        </Stack>
+                      </Box>
+                      <Inline gap="2" alignItems="center" cursor="pointer">
+                        <InputLabel
+                          fieldId={id}
+                          onClick={() => {
+                            setUpdatingMedia(index);
+                          }}
+                        >
+                          <Circle size="8" title="Change Media">
+                            <PencilIcon size="4" />
+                          </Circle>
+                        </InputLabel>
+                        <Circle
+                          size="8"
+                          backgroundColor="red100"
+                          title="Delete Media"
+                          onClick={(e: SyntheticEvent) => {
+                            e.stopPropagation();
+                            deleteMedia(index);
+                          }}
+                        >
+                          <TrashIcon size="4" color="red900" />
+                        </Circle>
+                      </Inline>
+                    </Inline>
+                  </Box>
+                ))}
+              </Stack>
+            ) : null}
+          </Stack>
+        </Box>
+      )}
     />
   );
 }

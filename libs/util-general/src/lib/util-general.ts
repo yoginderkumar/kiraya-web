@@ -2,6 +2,7 @@ import * as Validator from 'yup';
 import { stringify } from 'qs';
 import { isPossiblePhoneNumber } from 'react-phone-number-input';
 import { EffectCallback, useEffect } from 'react';
+import plural, { addRule as addPluralRule } from 'plural';
 
 // warn when a context is used by not defined/set
 export function normalizeNumber(
@@ -60,4 +61,16 @@ export function useMount(fn: () => void) {
   useEffectOnce(() => {
     fn();
   });
+}
+
+addPluralRule('is', 'are');
+
+const __PLURALIZED_CACHE__: { [key: string]: string } = {};
+export function pluralize(word: string, count: number | Array<unknown> = 2) {
+  if (Array.isArray(count)) count = count.length;
+  const key = `${word}__${count}`;
+  if (!__PLURALIZED_CACHE__[key]) {
+    __PLURALIZED_CACHE__[key] = plural(word, count);
+  }
+  return __PLURALIZED_CACHE__[key];
 }

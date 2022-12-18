@@ -3,6 +3,8 @@ const version = process.env.REACT_APP_VERSION || '1.0.0';
 const config = {
   appTitle: 'Kiraya',
   appVersion: version,
+  appName: '@kiraya/web',
+  appEnv: 'development',
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   firebaseConfig: {
     apiKey: 'AIzaSyDwrXJ9pLxI89qQEgdbCGLMDkcAPNsOIGc',
@@ -17,6 +19,11 @@ const config = {
     // cloudFunctionsRegion: process.env.REACT_APP_CLOUD_FUNCTIONS_REGION,
     // cloudFunctionsUSRegion: process.env.REACT_APP_CLOUD_FUNCTIONS_REGION_US,
     // supportPhoneNumberKey: 'support_number',
+  },
+  errorReporting: {
+    sentry: {
+      dsn: 'https://eb6dfe754c4843f58fa79dafcf6ab2c7@o4504317790650368.ingest.sentry.io/4504317798121472',
+    },
   },
 };
 

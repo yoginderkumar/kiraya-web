@@ -39,6 +39,7 @@ type SearchSelectProps<TOption extends TSelectableBaseOption> = {
   createOptionLabel?: (q: string) => React.ReactNode;
   onCreateOption?: (q: string, onSuccess: () => void) => void;
   isCreating?: boolean;
+  readonly?: boolean;
   height?: number;
   removeActionButtons?: boolean;
 };
@@ -54,6 +55,7 @@ export function SearchSelect<TOption extends TSelectableBaseOption>({
   searchDisabled,
   searchPlaceholder,
   value,
+  readonly,
   fetchOptions,
   createOptionLabel,
   onCreateOption,
@@ -132,8 +134,8 @@ export function SearchSelect<TOption extends TSelectableBaseOption>({
                 autoComplete="off"
                 onClick={menuContextValue.open}
                 placeholder={searchPlaceholder}
-                readOnly={isCreating}
-                disabled={isCreating}
+                readOnly={isCreating || readonly}
+                disabled={isCreating || readonly}
                 value={
                   isCreating
                     ? 'Creating...'
@@ -152,10 +154,10 @@ export function SearchSelect<TOption extends TSelectableBaseOption>({
                   handleQueryChange(q || '');
                 }}
               />
-              {hasValue && !isCreating ? (
+              {hasValue && (!isCreating || !readonly) ? (
                 <Box
                   as="button"
-                  disabled={isCreating || filtering}
+                  disabled={isCreating || readonly || filtering}
                   onClick={() => onChange(null)}
                   type="button"
                   padding="2"
@@ -166,7 +168,7 @@ export function SearchSelect<TOption extends TSelectableBaseOption>({
               ) : null}
               <Box
                 as="button"
-                disabled={isCreating || filtering}
+                disabled={isCreating || readonly || filtering}
                 onClick={menuContextValue.toggle}
                 type="button"
                 padding="2"
@@ -277,7 +279,9 @@ export function SearchSelect<TOption extends TSelectableBaseOption>({
                 )}
               </ol>
             </div>
-            {createOptionLabel && onCreateOption && !isCreating ? (
+            {createOptionLabel &&
+            onCreateOption &&
+            (!isCreating || !readonly) ? (
               <div className="p-3">
                 <button
                   type="button"

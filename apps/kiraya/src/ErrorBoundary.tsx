@@ -1,5 +1,5 @@
 import { queryToSearch } from '@kiraya/util-general';
-// import { logError } from '@kiraya/util-logging';
+import { logError } from '@kiraya/util-logging';
 import {
   ArrowDownIcon,
   InformationCircleIcon,

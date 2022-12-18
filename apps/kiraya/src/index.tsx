@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { init as initLogging } from '@kiraya/util-logging';
 import { FirebaseAppProvider, SuspenseWithPerf } from 'reactfire';
 import './index.css';
 import App from './App';
@@ -46,6 +47,13 @@ root.render(
     </Router>
   </FirebaseAppProvider>
 );
+
+initLogging({
+  env: config.appEnv as string,
+  dsn: config.errorReporting.sentry.dsn as string,
+  appName: config.appTitle,
+  appVersion: config.appVersion,
+});
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
