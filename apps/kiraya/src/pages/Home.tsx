@@ -9,12 +9,28 @@ import {
   Text,
 } from '@kiraya/kiraya-ui';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { HomeBanner } from '../assets/images';
 import { ProductCard, SkeletonProductCard } from '../Products/Products';
+
+const categories = [
+  'books',
+  'musicalInstruments',
+  'homeAppliances',
+  'furniture',
+  'decor',
+  'storage',
+];
 
 export default function Home() {
   const { isLoading, popularProducts } = useProductsForHomeUsers();
 
-  console.log('products:', popularProducts);
+  const navigate = useNavigate();
+
+  function onProductClick(prodId: string) {
+    navigate(`/products/${prodId}`);
+    return;
+  }
 
   return (
     <Box
@@ -25,6 +41,14 @@ export default function Home() {
       paddingY="4"
       backgroundColor="white"
     >
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        className="min-h-[44%] h-[44%]"
+      >
+        <img className="h-full rounded-lg" src={HomeBanner} alt="Home Banner" />
+      </Box>
       <Stack gap="3" paddingBottom="6">
         <Inline justifyContent="between" alignItems="center">
           <Heading as="h3" fontSize="lg" fontWeight="semibold">
@@ -54,12 +78,12 @@ export default function Home() {
                 <Box
                   key={product.uid}
                   as="li"
-                  className="w-full max-w-xs hover:shadow-2xl hover:rounded-lg"
+                  className="min-w-[25%] max-w-xs hover:shadow-2xl hover:rounded-lg"
                   rounded="md"
                 >
                   <ProductCard
                     product={product}
-                    onProductClick={(prodId) => console.log(prodId)}
+                    onProductClick={onProductClick}
                   />
                 </Box>
               ))

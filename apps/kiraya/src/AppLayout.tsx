@@ -3,6 +3,7 @@ import {
   ArrowDownIcon,
   Box,
   Circle,
+  getButtonClassName,
   Heading,
   Inline,
   LogoutIcon,
@@ -20,13 +21,7 @@ import {
   Text,
   UserIcon,
 } from '@kiraya/kiraya-ui';
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams,
-} from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AuthenticationInModal } from './Auth';
 import { useProfile } from '@kiraya/data-store/users';
 import config from './config';
@@ -130,17 +125,45 @@ export function Header() {
           </button>
         </Box>
       </Inline>
+      <Box minWidth="max">
+        <Link
+          to="/profile/your-products/add-product"
+          className={getButtonClassName({
+            fullWidth: true,
+            level: 'primary',
+          })}
+          style={{ borderRadius: 8, height: 44 }}
+        >
+          <Box>
+            <PlusIcon />
+          </Box>
+          Add Product
+        </Link>
+      </Box>
       <Menu>
         <MenuButton inline>
-          <Circle size="10">
-            {user && user.displayName ? (
+          <Stack
+            className="w-[44px] h-[44px]"
+            backgroundColor="blue100"
+            justifyContent="center"
+            alignItems="center"
+            rounded="lg"
+          >
+            {user && user.photoURL ? (
+              <img
+                src={user.photoURL}
+                className="rounded-lg"
+                referrerPolicy="no-referrer"
+                alt={user.displayName}
+              />
+            ) : user && user.displayName ? (
               <Text textTransform="uppercase" fontSize="md" color="blue900">
                 {user.displayName ? user.displayName[0] : 'KU'}
               </Text>
             ) : (
               <UserIcon />
             )}
-          </Circle>
+          </Stack>
           {user && user.uid ? <ArrowDownIcon /> : null}
         </MenuButton>
         {user && user.uid ? (
@@ -148,9 +171,22 @@ export function Header() {
             <MenuLink to={'/profile'} className="border-b py-4 mb-2">
               <Inline alignItems="center" gap="4" className="w-60">
                 <Circle size="12">
-                  <Text textTransform="uppercase" fontSize="lg" color="blue900">
-                    {user.displayName ? user.displayName[0] : 'KU'}
-                  </Text>
+                  {user && user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      className="rounded-full"
+                      referrerPolicy="no-referrer"
+                      alt={user.displayName}
+                    />
+                  ) : user && user.displayName ? (
+                    <Text
+                      textTransform="uppercase"
+                      fontSize="lg"
+                      color="blue900"
+                    >
+                      {user.displayName ? user.displayName[0] : 'KU'}
+                    </Text>
+                  ) : null}
                 </Circle>
                 <Stack gap="1">
                   <Heading as="h4" fontWeight="medium">
@@ -293,21 +329,13 @@ export function ProfileSidebar({
               size="8"
               alignItems="center"
               justifyContent="center"
-              bgColor="blue900"
+              bgColor="green900"
               rounded="md"
             >
               <PlusIcon size="6" />
             </Stack>
-            <Text as="span">Add New Product</Text>
+            <Text as="span">Add Product</Text>
           </Inline>
-          {/* <AddNewBusinessInModal
-          onSuccess={(newBusinessId) =>
-            navigate(`${routePrefix}/businesses/${newBusinessId}/cashbooks`)
-          }
-        >
-          {({ add }) => (
-          )}
-        </AddNewBusinessInModal> */}
         </Box>
       </Box>
 
@@ -340,7 +368,6 @@ export function ProfileSidebar({
                         ? 'blue900'
                         : 'transparent'
                     }
-                    // bgColor={state === option.id ? 'blue900' : 'transparent'}
                   >
                     {option.icon ? <Box>{option.icon}</Box> : null}
                     <Stack flex="1" minWidth="0" gap="1">

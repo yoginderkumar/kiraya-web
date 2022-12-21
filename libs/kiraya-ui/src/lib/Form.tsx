@@ -478,6 +478,7 @@ export function FormMediaFileField({
               form.setFieldTouched(field.name, true);
             }}
             onChange={({ currentTarget: { value, files } }) => {
+              console.log('File: ', value, files, updatingMedia);
               form.setFieldTouched(field.name, true);
               const numOfFiles = files?.length || 0;
               if (numOfFiles > filesUpto) {
@@ -492,7 +493,8 @@ export function FormMediaFileField({
                   return;
                 }
                 const filesConverted = Object.values(files);
-                if (updatingMedia != null) {
+                setUpdatingMedia(null);
+                if (updatingMedia != null && files[0].name) {
                   const updatedFiles = multiples.map((file, index) => {
                     if (updatingMedia === index) {
                       return filesConverted[0];
@@ -500,7 +502,6 @@ export function FormMediaFileField({
                     return file;
                   });
                   setMultiples(updatedFiles);
-                  setUpdatingMedia(null);
                   return;
                 }
                 setMultiples((prevMultiples) =>

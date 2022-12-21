@@ -18,6 +18,7 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import YourProduct from './pages/YourProduct';
 import YourProducts from './pages/YourProducts';
+import ProductsPage from './pages/ProductPage';
 
 function App() {
   const app = useFirebaseApp();
@@ -30,6 +31,7 @@ function App() {
         <AuthProvider sdk={auth}>
           <Routes>
             <Route path="/" element={<AppLayout />}>
+              <Route path="/products/:productId" element={<ProductsPage />} />
               <Route path="/home" element={<Home />} />
               <Route
                 path="/profile"

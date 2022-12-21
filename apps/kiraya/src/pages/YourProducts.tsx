@@ -1,5 +1,14 @@
 import { useProductsForOwner } from '@kiraya/data-store/products';
-import { Box, Text, Stack, Inline, Button, Heading } from '@kiraya/kiraya-ui';
+import {
+  Box,
+  Text,
+  Stack,
+  Inline,
+  Button,
+  Heading,
+  ButtonLink,
+  getButtonClassName,
+} from '@kiraya/kiraya-ui';
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../Products/Products';
@@ -19,9 +28,22 @@ export default function YourProducts() {
               </Heading>
             </Box>
             <Stack gap="6">
-              <Text fontSize="lg" fontWeight="semibold">
-                Your Products
-              </Text>
+              <Stack>
+                <Text fontSize="lg" fontWeight="semibold">
+                  Your Products
+                </Text>
+                {products.length ? (
+                  <Text>
+                    You can add your more products. By simply{' '}
+                    <Link
+                      className={getButtonClassName({ inline: true })}
+                      to="add-product"
+                    >
+                      Clicking here
+                    </Link>
+                  </Text>
+                ) : null}
+              </Stack>
               {products.length ? (
                 <Inline gap="6" as="ul" flexWrap="wrap">
                   {products.map((product) => {

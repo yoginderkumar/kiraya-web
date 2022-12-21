@@ -30,6 +30,10 @@ export type TUser = {
     creationTime?: string;
     lastSignInTime?: string;
   };
+  ratings?: {
+    totalRatings: number;
+    numberOfReviews: number;
+  };
 };
 function useUserCollection() {
   const store = useFirestore();
