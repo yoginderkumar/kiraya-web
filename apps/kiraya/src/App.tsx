@@ -5,6 +5,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import {
   AuthProvider,
+  DatabaseProvider,
   FirestoreProvider,
   StorageProvider,
   useFirebaseApp,
@@ -19,40 +20,47 @@ import Profile from './pages/Profile';
 import YourProduct from './pages/YourProduct';
 import YourProducts from './pages/YourProducts';
 import ProductsPage from './pages/ProductPage';
+import { LoginPage, SignUpPage } from './pages/Auth/index';
+import { getDatabase } from 'firebase/database';
 
 function App() {
   const app = useFirebaseApp();
   const firestore = getFirestore(app);
   const auth = getAuth(app);
+  const database = getDatabase(app);
   const storage = getStorage(app);
   return (
     <FirestoreProvider sdk={firestore}>
-      <StorageProvider sdk={storage}>
-        <AuthProvider sdk={auth}>
-          <Routes>
-            <Route path="/" element={<AppLayout />}>
-              <Route path="/products/:productId" element={<ProductsPage />} />
-              <Route path="/home" element={<Home />} />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="your-products">
-                  <Route path="" element={<YourProducts />} />
-                  <Route path=":productId" element={<YourProduct />} />
-                  <Route path="add-product" element={<AddProduct />} />
+      <DatabaseProvider sdk={database}>
+        <StorageProvider sdk={storage}>
+          <AuthProvider sdk={auth}>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/" element={<AppLayout />}>
+                <Route path="/products/:productId" element={<ProductsPage />} />
+                <Route path="/home" element={<Home />} />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="your-products">
+                    <Route path="" element={<YourProducts />} />
+                    <Route path=":productId" element={<YourProduct />} />
+                    <Route path="add-product" element={<AddProduct />} />
+                  </Route>
+                  <Route path="" element={<Profile />} />
                 </Route>
-                <Route path="" element={<Profile />} />
+                <Route path="" element={<Home />} />
               </Route>
-              <Route path="" element={<Home />} />
-            </Route>
-          </Routes>
-        </AuthProvider>
-      </StorageProvider>
+            </Routes>
+          </AuthProvider>
+        </StorageProvider>
+      </DatabaseProvider>
     </FirestoreProvider>
   );
 }

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ArrowDownIcon,
   Box,
+  Button,
   Circle,
   getButtonClassName,
   Heading,
@@ -42,6 +43,19 @@ export function AppLayout() {
 export function Header() {
   const logout = useLogout();
   const { user } = useProfile();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  const [isSearchInFocus, setSearchInFocus] = useState<boolean>(false);
+  function onInputFocus() {
+    setTimeout(() => {
+      setSearchInFocus(true);
+    }, 100);
+    inputContainerRef.current?.classList.replace('w-[20%]', 'w-[40%]');
+  }
+  function onBlurredInput() {
+    setSearchInFocus(false);
+    inputContainerRef.current?.classList.replace('w-[40%]', 'w-[20%]');
+  }
   return (
     <Inline
       paddingX="12"
@@ -52,185 +66,158 @@ export function Header() {
       gap="4"
       justifyContent="between"
     >
-      <Box width="1/2">
+      <Inline alignItems="center" gap="6">
         <Link to="/">
           <Heading fontWeight="semibold" as="h1" fontSize="2xl" color="blue900">
             {config.appTitle.toUpperCase()}
           </Heading>
         </Link>
-      </Box>
-      <Inline
-        width="full"
-        rounded="md"
-        borderWidth="2"
-        alignItems="center"
-        borderColor="blue900"
-        backgroundColor="blue900"
-      >
-        <Inline
-          gap="2"
-          paddingY="2"
-          paddingX="4"
-          width="full"
-          height="full"
-          backgroundColor="white"
-          borderTopLeftRadius="md"
-          borderBottomLeftRadius="md"
+      </Inline>
+      <Inline width="full" justifyContent="end" alignItems="center" gap="8">
+        <Button
+          level="primary"
+          style={{
+            borderRadius: '100px',
+            backgroundColor: '#EEEEEE',
+            borderColor: '#EEEEEE',
+          }}
         >
-          <Box alignSelf="center">
-            <button
-              id="dropdownDividerButton"
-              data-dropdown-toggle="dropdownDivider"
-              className="flex items-center items-center justify-center text-black text-sm font-semibold w-max"
-              type="button"
-            >
-              ALL CATEGORIES
-              <Box>
-                <ArrowDownIcon size="5" className="text-gray-500" />
-              </Box>
-            </button>
+          <Text fontWeight="semibold" fontSize="sm" color="gray500">
+            Categories
+          </Text>
+          <Box>
+            <ArrowDownIcon size="5" color="gray500" />
           </Box>
-          <Box className="w-[3px]" rounded="md" backgroundColor="gray200" />
-          <Box
-            display="flex"
-            alignItems="center"
-            width="full"
-            borderWidth="0"
-            minHeight="full"
-            alignSelf="center"
-            backgroundColor="white"
-            borderTopRightRadius="lg"
-            borderBottomRightRadius="lg"
-          >
-            <input
-              type="search"
-              name="q"
-              placeholder="Search here..."
-              className="bg-transparent outline-none flex-1 w-full placeholder:gray-600"
-            />
-          </Box>
-        </Inline>
+        </Button>
         <Box
-          backgroundColor="blue900"
-          display="flex"
-          alignItems="center"
-          alignSelf="stretch"
-          paddingX="3"
-          cursor="pointer"
+          position="relative"
+          height="10"
+          ref={inputContainerRef}
+          className="w-[20%] search-box"
         >
-          <button type="button" className="text-gray-500">
+          <input
+            type="search"
+            name="q"
+            ref={inputRef}
+            onFocus={onInputFocus}
+            onBlur={onBlurredInput}
+            placeholder="Search here..."
+            className="h-full w-full border-[2px] bg-white text-md rounded-[50px] px-4 outline-0"
+          />
+          <button
+            type="button"
+            className="text-white rounded-full h-8 w-8 bg-blue-900 absolute top-[50%] right-[5px] translate-y-[-50%]"
+          >
             <Box>
-              <SearchIcon color="white" />
+              <SearchIcon />
             </Box>
           </button>
         </Box>
-      </Inline>
-      <Box minWidth="max">
-        <Link
-          to="/profile/your-products/add-product"
-          className={getButtonClassName({
-            fullWidth: true,
-            level: 'primary',
-          })}
-          style={{ borderRadius: 8, height: 44 }}
-        >
-          <Box>
-            <PlusIcon />
-          </Box>
-          Add Product
-        </Link>
-      </Box>
-      <Menu>
-        <MenuButton inline>
-          <Stack
-            className="w-[44px] h-[44px]"
-            backgroundColor="blue100"
-            justifyContent="center"
-            alignItems="center"
-            rounded="lg"
-          >
-            {user && user.photoURL ? (
-              <img
-                src={user.photoURL}
-                className="rounded-lg"
-                referrerPolicy="no-referrer"
-                alt={user.displayName}
-              />
-            ) : user && user.displayName ? (
-              <Text textTransform="uppercase" fontSize="md" color="blue900">
-                {user.displayName ? user.displayName[0] : 'KU'}
-              </Text>
-            ) : (
-              <UserIcon />
-            )}
-          </Stack>
-          {user && user.uid ? <ArrowDownIcon /> : null}
-        </MenuButton>
         {user && user.uid ? (
-          <MenuList align="bottom-right">
-            <MenuLink to={'/profile'} className="border-b py-4 mb-2">
-              <Inline alignItems="center" gap="4" className="w-60">
-                <Circle size="12">
-                  {user && user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      className="rounded-full"
-                      referrerPolicy="no-referrer"
-                      alt={user.displayName}
-                    />
-                  ) : user && user.displayName ? (
-                    <Text
-                      textTransform="uppercase"
-                      fontSize="lg"
-                      color="blue900"
-                    >
-                      {user.displayName ? user.displayName[0] : 'KU'}
-                    </Text>
-                  ) : null}
-                </Circle>
-                <Stack gap="1">
-                  <Heading as="h4" fontWeight="medium">
-                    {user.displayName || `${config.appTitle} User`}
-                  </Heading>
-                  <Text
-                    fontSize="sm"
-                    color="gray500"
-                    className="tracking-wider"
-                  >
-                    {user.phoneNumber}
+          <Menu>
+            <MenuButton inline>
+              <Circle size="8">
+                {user && user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    className="rounded-full"
+                    referrerPolicy="no-referrer"
+                    alt={user.displayName}
+                  />
+                ) : user && user.displayName ? (
+                  <Text textTransform="uppercase" fontSize="lg" color="blue900">
+                    {user.displayName ? user.displayName[0] : 'KU'}
                   </Text>
-                  <Text fontSize="xs" color="blue900" fontWeight="medium">
-                    Your Profile <ArrowDownIcon rotate="270" size="4" />
-                  </Text>
-                </Stack>
-              </Inline>
-            </MenuLink>
-            <MenuItemHeader className="mt-2">Settings</MenuItemHeader>
-            <MenuLink to="/profile/your-products">
-              <ProductBoxIcon /> Your Products
-            </MenuLink>
-            <MenuItem action="logout" onClick={logout}>
-              <LogoutIcon /> Logout
-            </MenuItem>
-            <MenuItemHeader className="py-2 px-2 text-gray-500">
-              &copy; {config.appTitle} • Version {config.appVersion}
-            </MenuItemHeader>
-          </MenuList>
-        ) : (
-          <AuthenticationInModal>
-            {({ onOpen }) => (
+                ) : (
+                  <UserIcon />
+                )}
+              </Circle>
+              {user && user.uid ? <ArrowDownIcon /> : null}
+            </MenuButton>
+            {user && user.uid ? (
               <MenuList align="bottom-right">
-                <MenuItem action="login" onClick={() => onOpen('login')}>
-                  Login
+                <MenuLink to={'/profile'} className="border-b py-4 mb-2">
+                  <Inline alignItems="center" gap="4" className="w-60">
+                    <Circle size="12">
+                      {user && user.photoURL ? (
+                        <img
+                          src={user.photoURL}
+                          className="rounded-full"
+                          referrerPolicy="no-referrer"
+                          alt={user.displayName}
+                        />
+                      ) : user && user.displayName ? (
+                        <Text
+                          textTransform="uppercase"
+                          fontSize="lg"
+                          color="blue900"
+                        >
+                          {user.displayName ? user.displayName[0] : 'KU'}
+                        </Text>
+                      ) : null}
+                    </Circle>
+                    <Stack gap="1">
+                      <Heading as="h4" fontWeight="medium">
+                        {user.displayName || `${config.appTitle} User`}
+                      </Heading>
+                      <Text
+                        fontSize="sm"
+                        color="gray500"
+                        className="tracking-wider"
+                      >
+                        {user.phoneNumber}
+                      </Text>
+                      <Text fontSize="xs" color="blue900" fontWeight="medium">
+                        Your Profile <ArrowDownIcon rotate="270" size="4" />
+                      </Text>
+                    </Stack>
+                  </Inline>
+                </MenuLink>
+                <MenuItemHeader className="mt-2">Settings</MenuItemHeader>
+                <MenuLink to="/profile/your-products">
+                  <ProductBoxIcon /> Your Products
+                </MenuLink>
+                <MenuItem action="logout" onClick={logout}>
+                  <LogoutIcon /> Logout
                 </MenuItem>
-                <MenuItem action="login" onClick={() => onOpen('signup')}>
-                  Signup
-                </MenuItem>
+                <MenuItemHeader className="py-2 px-2 text-gray-500">
+                  &copy; {config.appTitle} • Version {config.appVersion}
+                </MenuItemHeader>
               </MenuList>
+            ) : (
+              <AuthenticationInModal>
+                {({ onOpen }) => (
+                  <MenuList align="bottom-right">
+                    <MenuItem action="login" onClick={() => onOpen('login')}>
+                      Login
+                    </MenuItem>
+                    <MenuItem action="login" onClick={() => onOpen('signup')}>
+                      Signup
+                    </MenuItem>
+                  </MenuList>
+                )}
+              </AuthenticationInModal>
             )}
-          </AuthenticationInModal>
+          </Menu>
+        ) : (
+          <Inline gap="4" alignItems="center">
+            <Link
+              to="/login?from=home"
+              style={{ borderRadius: '100px' }}
+              className={getButtonClassName({ level: 'primary' })}
+            >
+              Login
+            </Link>
+            <Link
+              to="/signup?from=home"
+              style={{ borderRadius: '100px' }}
+              className={getButtonClassName({})}
+            >
+              Sign up
+            </Link>
+          </Inline>
         )}
-      </Menu>
+      </Inline>
     </Inline>
   );
 }

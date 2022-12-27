@@ -213,7 +213,7 @@ export const ErrorMessage = connect<{ name: string }>(function ErrorMessage({
   );
 });
 
-function InputLabel({
+export function InputLabel({
   children,
   fieldId,
   className,
@@ -252,6 +252,7 @@ function InputLabel({
 export function FormImageFileField({
   ref,
   label,
+  hideUpdate,
   defaultValue,
   onRemove,
   onSelectionStart,
@@ -259,6 +260,7 @@ export function FormImageFileField({
   previewClassName,
   ...props
 }: FormFieldProps & {
+  hideUpdate?: boolean;
   onRemove?: () => void;
   // Callback to handle the first image selection
   onSelectionStart?: () => void;
@@ -341,7 +343,7 @@ export function FormImageFileField({
                     }}
                   />
                   <Modal
-                    title={mediaName}
+                    title={mediaName || props.title || 'Preview Image'}
                     isOpen={imagePreviewState.isOpen}
                     onClose={imagePreviewState.close}
                   >
@@ -361,27 +363,35 @@ export function FormImageFileField({
                       >
                         Ok
                       </Button>
-                      <InputLabel
-                        fieldId={id}
-                        className={getButtonClassName({ size: 'lg' })}
-                      >
-                        <PencilIcon />
-                      </InputLabel>
+                      {!hideUpdate && (
+                        <InputLabel
+                          fieldId={id}
+                          className={getButtonClassName({ size: 'lg' })}
+                        >
+                          <PencilIcon /> Change
+                        </InputLabel>
+                      )}
                     </ModalFooter>
                   </Modal>
                 </div>
-                <label
-                  htmlFor={id}
-                  className={classNames(getButtonClassName({ inline: true }), {
-                    'block ring-2 ring-blue-900': fileInputFocused,
-                  })}
-                >
-                  <PencilIcon />
-                </label>
+                {!hideUpdate && (
+                  <label
+                    htmlFor={id}
+                    className={classNames(
+                      getButtonClassName({ inline: true }),
+                      {
+                        'block ring-2 ring-blue-900': fileInputFocused,
+                      }
+                    )}
+                  >
+                    <PencilIcon /> Change
+                  </label>
+                )}
                 <div className="border-l pl-4 flex items-center">
                   <Button
                     inline
                     status="error"
+                    disabled={props.disabled}
                     onClick={() => {
                       form.setFieldValue(field.name, '');
                       setFileName('');
@@ -390,7 +400,7 @@ export function FormImageFileField({
                       onRemove?.();
                     }}
                   >
-                    <TrashIcon />
+                    <TrashIcon /> Delete
                   </Button>
                 </div>
               </div>
@@ -405,14 +415,18 @@ export function FormImageFileField({
 export function FormMediaFileField({
   ref,
   imageFiles,
+  savedImages,
   defaultValue,
   maxMediaFiles,
+  onRemove,
   onSelectionStart,
   ...props
 }: FormFieldProps & {
   defaultValue?: string;
   maxMediaFiles?: number;
   imageFiles: File[];
+  savedImages?: string[];
+  onRemove?: (index: number) => void;
   onSelectionStart?: () => void;
 }) {
   const id = props.id || props.name;
@@ -425,6 +439,14 @@ export function FormMediaFileField({
   const [dataUrl, setFileDataUrl] = useState<string | undefined>(
     defaultValue ? String(defaultValue) : undefined
   );
+  const [cloudImages, setCloudImages] = useState<string[]>(
+    savedImages?.length ? savedImages : []
+  );
+  const [previewCloudFile, setPreviewCloudFile] = useState<{
+    file: string;
+    index: number;
+  } | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState<boolean>(true);
 
   useEffect(() => {
     if (previewFile !== null) {
@@ -433,6 +455,18 @@ export function FormMediaFileField({
       });
     }
   }, [previewFile]);
+
+  useEffect(() => {
+    if (previewCloudFile !== null) {
+      setFileDataUrl(previewCloudFile.file);
+    }
+  }, [previewCloudFile]);
+
+  useEffect(() => {
+    if (savedImages?.length) {
+      setCloudImages(savedImages);
+    }
+  }, [savedImages?.length, savedImages]);
 
   useEffect(() => {
     if (!imageFiles.length) {
@@ -444,13 +478,22 @@ export function FormMediaFileField({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fileInputFocused, setFileInputFocusState] = useState<boolean>(false);
   const filesUpto = useMemo(() => {
-    return maxMediaFiles || 1;
-  }, [maxMediaFiles]);
+    return cloudImages?.length
+      ? (maxMediaFiles || cloudImages.length + 1) - cloudImages.length
+      : maxMediaFiles
+      ? maxMediaFiles
+      : 1;
+  }, [maxMediaFiles, cloudImages]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [{ value }, meta, { setValue }] = useField<File[]>(props.name);
 
-  function deleteMedia(index: number) {
+  function deleteMedia(index: number, fromCloud?: boolean) {
+    onRemove?.(index);
+    if (fromCloud) {
+      setCloudImages((prevImages) => prevImages.filter((_, i) => i !== index));
+      return;
+    }
     const updatedFiles = multiples.filter((_, i) => i !== index);
     setMultiples(updatedFiles);
     setValue(updatedFiles);
@@ -478,7 +521,6 @@ export function FormMediaFileField({
               form.setFieldTouched(field.name, true);
             }}
             onChange={({ currentTarget: { value, files } }) => {
-              console.log('File: ', value, files, updatingMedia);
               form.setFieldTouched(field.name, true);
               const numOfFiles = files?.length || 0;
               if (numOfFiles > filesUpto) {
@@ -519,7 +561,11 @@ export function FormMediaFileField({
           <Stack gap="4">
             <InputLabel
               fieldId={id}
-              onClick={() => {
+              onClick={(e: SyntheticEvent) => {
+                if (props.disabled) {
+                  e.preventDefault();
+                  return;
+                }
                 onSelectionStart?.();
               }}
             >
@@ -537,7 +583,9 @@ export function FormMediaFileField({
                 className="border-dashed"
                 cursor="pointer"
                 backgroundColor={
-                  multiples.length === filesUpto ? 'gray100' : undefined
+                  multiples.length === filesUpto || props.disabled
+                    ? 'gray100'
+                    : undefined
                 }
               >
                 <Stack alignItems="center" gap="4" justifyContent="center">
@@ -559,15 +607,36 @@ export function FormMediaFileField({
               </Box>
             </InputLabel>
             <Modal
-              title={previewFile?.file.name || ''}
-              isOpen={previewFile !== null && imagePreviewState.isOpen}
+              title={previewFile?.file.name || 'Preview Image'}
+              isOpen={
+                (previewFile !== null || previewCloudFile !== null) &&
+                imagePreviewState.isOpen
+              }
               onClose={imagePreviewState.close}
             >
               <ModalBody>
+                {loadingPreview ? (
+                  <div className="w-full h-60">
+                    <div className="flex justify-center items-center w-full h-60 bg-gray-100 rounded sm:w-96">
+                      <svg
+                        className="w-12 h-12 text-gray-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        fill="currentColor"
+                        viewBox="0 0 640 512"
+                      >
+                        <path d="M480 80C480 35.82 515.8 0 560 0C604.2 0 640 35.82 640 80C640 124.2 604.2 160 560 160C515.8 160 480 124.2 480 80zM0 456.1C0 445.6 2.964 435.3 8.551 426.4L225.3 81.01C231.9 70.42 243.5 64 256 64C268.5 64 280.1 70.42 286.8 81.01L412.7 281.7L460.9 202.7C464.1 196.1 472.2 192 480 192C487.8 192 495 196.1 499.1 202.7L631.1 419.1C636.9 428.6 640 439.7 640 450.9C640 484.6 612.6 512 578.9 512H55.91C25.03 512 .0006 486.1 .0006 456.1L0 456.1z" />
+                      </svg>
+                    </div>
+                  </div>
+                ) : null}
                 <img
                   src={dataUrl}
                   alt="Preview"
-                  className="w-full h-full max-w-full"
+                  onLoad={() => setLoadingPreview(false)}
+                  className={`w-full h-full max-w-full ${
+                    loadingPreview ? 'hidden' : 'block'
+                  }`}
                 />
               </ModalBody>
               <ModalFooter>
@@ -581,7 +650,7 @@ export function FormMediaFileField({
                 </Button>
               </ModalFooter>
             </Modal>
-            {multiples.length ? (
+            {multiples.length || cloudImages.length ? (
               <Stack
                 as="ul"
                 gap="3"
@@ -628,7 +697,11 @@ export function FormMediaFileField({
                       <Inline gap="2" alignItems="center" cursor="pointer">
                         <InputLabel
                           fieldId={id}
-                          onClick={() => {
+                          onClick={(e) => {
+                            if (props.disabled) {
+                              e.preventDefault();
+                              return;
+                            }
                             setUpdatingMedia(index);
                           }}
                         >
@@ -642,6 +715,9 @@ export function FormMediaFileField({
                           title="Delete Media"
                           onClick={(e: SyntheticEvent) => {
                             e.stopPropagation();
+                            if (props.disabled) {
+                              return;
+                            }
                             deleteMedia(index);
                           }}
                         >
@@ -651,6 +727,63 @@ export function FormMediaFileField({
                     </Inline>
                   </Box>
                 ))}
+                {cloudImages.length
+                  ? cloudImages.map((url, index) => (
+                      <Box
+                        key={`image_${url}_${index}`}
+                        borderWidth="1"
+                        rounded="lg"
+                        paddingX="3"
+                        paddingY="2"
+                      >
+                        <Inline alignItems="center" justifyContent="between">
+                          <Box
+                            className="w-9/12"
+                            cursor="pointer"
+                            onClick={() => {
+                              setPreviewCloudFile({ file: url, index });
+                              imagePreviewState.open();
+                            }}
+                          >
+                            <Stack>
+                              <Text
+                                fontSize="sm"
+                                fontWeight="semibold"
+                                className="truncate"
+                              >
+                                {url}
+                              </Text>
+                              <Button inline align="left">
+                                <Text
+                                  fontWeight="semibold"
+                                  fontSize="sm"
+                                  color="blue900"
+                                >
+                                  Click to preview
+                                </Text>
+                              </Button>
+                            </Stack>
+                          </Box>
+                          <Inline gap="2" alignItems="center" cursor="pointer">
+                            <Circle
+                              size="8"
+                              backgroundColor="red100"
+                              title="Delete Media"
+                              onClick={(e: SyntheticEvent) => {
+                                e.stopPropagation();
+                                if (props.disabled) {
+                                  return;
+                                }
+                                deleteMedia(index, true);
+                              }}
+                            >
+                              <TrashIcon size="4" color="red900" />
+                            </Circle>
+                          </Inline>
+                        </Inline>
+                      </Box>
+                    ))
+                  : null}
               </Stack>
             ) : null}
           </Stack>

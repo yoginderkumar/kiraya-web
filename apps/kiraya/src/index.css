@@ -20,3 +20,7 @@ code {
 input[type='search'] {
   -webkit-appearance: none;
 }
+
+.search-box {
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}

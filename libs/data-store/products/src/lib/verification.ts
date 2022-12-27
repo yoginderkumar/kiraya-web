@@ -2,9 +2,13 @@ import {
   addDoc,
   collection,
   CollectionReference,
-  // doc,
+  where,
   setDoc,
   serverTimestamp,
+  doc,
+  updateDoc,
+  query,
+  getDocs,
 } from 'firebase/firestore';
 import { useFirestore } from 'reactfire';
 
@@ -22,10 +26,10 @@ function useVerificationRequestsCollection() {
   return collection(store, 'Verification') as CollectionReference<Verification>;
 }
 
-//   function useVerificationDocument(docId: string) {
-//     const verificationCollection = useVerificationRequestsCollection();
-//     return doc(verificationCollection, docId);
-//   }
+function useVerificationRequestsForProductCollection() {
+  const store = useFirestore();
+  return collection(store, 'Verification');
+}
 
 export function useCreateVerificationRequest() {
   const verificationRef = useVerificationRequestsCollection();
@@ -44,7 +48,32 @@ export function useCreateVerificationRequest() {
       throw new Error(err.message);
     }
   }
+
   return {
     create,
+  };
+}
+
+export function useUpdateVerificationRequestWithProduct() {
+  const { create } = useCreateVerificationRequest();
+  const verificationRef = useVerificationRequestsForProductCollection();
+  async function update(productId: string) {
+    const queryRef = query(
+      verificationRef,
+      where('productId', '==', productId)
+    );
+    const querySnapshot = await getDocs(queryRef);
+    if (!querySnapshot.docs.length) {
+      await create(productId);
+      return;
+    }
+    const docRef = doc(verificationRef, querySnapshot.docs[0].id);
+    await updateDoc(docRef, {
+      status: 'pending',
+      updatedAt: serverTimestamp(),
+    });
+  }
+  return {
+    update,
   };
 }

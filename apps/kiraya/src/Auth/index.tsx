@@ -16,7 +16,7 @@ import {
   Alert,
 } from '@kiraya/kiraya-ui';
 import { useLoginUser } from '@kiraya/data-store/auth';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FieldProps, Form, Formik } from 'formik';
 import toast from 'react-hot-toast';
 import { useSigninCheck, useUser } from 'reactfire';
@@ -316,10 +316,46 @@ function SignupForm({
   );
 }
 
+export function UserProfileInModal({
+  defaultState,
+  children,
+  onSuccess,
+}: {
+  defaultState?: boolean;
+  children?: (props: {
+    onOpen: (type?: 'login' | 'signup') => void;
+  }) => React.ReactNode;
+  onSuccess?: () => void;
+}) {
+  useEffect(() => {
+    if (defaultState) {
+      state.open();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultState]);
+  const state = useOverlayTriggerState({});
+  return (
+    <>
+      {children?.({
+        onOpen: () => state.open(),
+      })}
+      <Modal
+        isOpen={state.isOpen}
+        onClose={state.close}
+        title={'Complete Your Profile'}
+        isDismissable={false}
+      >
+        <UserProfileForm
+          onSuccess={() => (onSuccess ? onSuccess() : state.close())}
+        />
+      </Modal>
+    </>
+  );
+}
+
 function UserProfileForm({ onSuccess }: { onSuccess?: () => void }) {
   const { data: authUser } = useUser();
   const createProfile = useCreateProfile();
-  console.log('Data: ', authUser);
   const parsedPhoneNumber = useMemo(() => {
     if (authUser?.phoneNumber) {
       return parsePhoneNumber(
@@ -404,9 +440,6 @@ function UserProfileForm({ onSuccess }: { onSuccess?: () => void }) {
                 size="lg"
               >
                 {isSubmitting ? <SpinnerIcon color="white" /> : null}Proceed
-              </Button>
-              <Button disabled={isSubmitting} size="lg">
-                Skip
               </Button>
             </ModalFooter>
           </>

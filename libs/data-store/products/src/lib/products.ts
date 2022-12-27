@@ -4,26 +4,16 @@ import {
   collection,
   CollectionReference,
   doc,
-  setDoc,
   serverTimestamp,
-  updateDoc,
   query,
   where,
   orderBy,
   deleteDoc,
-  DocumentReference,
   writeBatch,
 } from 'firebase/firestore';
-import {
-  getDownloadURL,
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-} from 'firebase/storage';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  useDatabase,
-  useFirebaseApp,
   useFirestore,
   useFirestoreCollectionData,
   useFirestoreDocData,
@@ -32,7 +22,10 @@ import {
 } from 'reactfire';
 import { TUser, useProfile } from '@kiraya/data-store/users';
 import { Optional } from 'utility-types';
-import { useCreateVerificationRequest } from './verification';
+import {
+  useCreateVerificationRequest,
+  useUpdateVerificationRequestWithProduct,
+} from './verification';
 
 export type ProductCategory = {
   id: string;
@@ -125,7 +118,7 @@ export function useCreateProduct() {
   const storage = useStorage();
   const { user: authUser } = useProfile();
   const productRef = useProductsCollection();
-  const batch = writeBatch(useFirestore());
+  const firebaseApp = useFirestore();
   const { create: createVerification } = useCreateVerificationRequest();
 
   async function uploadImages(files: File[], productId: string) {
@@ -170,6 +163,7 @@ export function useCreateProduct() {
       pricePerMonth: number;
     }) => {
       try {
+        const batch = writeBatch(firebaseApp);
         const userObj: Optional<TUser> = {
           displayName: authUser.displayName || undefined,
           photoURL: authUser.photoURL,
@@ -217,111 +211,6 @@ export function useCreateProduct() {
   };
 }
 
-export function useUpdateProduct(productId: string) {
-  const productRef = useProductDocument(productId);
-  async function updateProductData(data: Optional<Product>) {
-    try {
-      await updateDoc(productRef, {
-        ...data,
-        isUnderReview: true,
-        updatedAt: serverTimestamp(),
-      });
-    } catch (e) {
-      const err = e as Error;
-      throw new Error(err.message);
-    }
-  }
-
-  async function updateProductMedia(images: string[]) {
-    try {
-      await updateDoc(productRef, {
-        productMedia: images,
-      });
-    } catch (e) {
-      const err = e as Error;
-      throw new Error(err.message);
-    }
-  }
-
-  return {
-    updateProductData,
-    updateProductMedia,
-  };
-}
-
-type MultipleImagesResponse = {
-  message: string;
-  urls: string[];
-};
-
-export function useProductImages(userId: string) {
-  const storage = useStorage();
-  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
-  async function addProductImage(file: File, productId: string) {
-    const productsStorageRef = ref(
-      storage,
-      `Products/${userId}/${productId}/${uuidv4()}`
-    );
-    const uploadTask = uploadBytes(productsStorageRef, file);
-    const url = await uploadTask
-      .then(async (uploaded) => {
-        const url = await getDownloadURL(uploaded.ref);
-        return url;
-      })
-      .catch((err) => console.log('err: ', err));
-    return {
-      url,
-    };
-  }
-
-  async function addProductImages(files: File[], productId: string) {
-    try {
-      const promises = [];
-      const uploadTasks = files.map((file) => {
-        const productsStorageRef = ref(
-          storage,
-          `Products/${userId}/${productId}/${uuidv4()}`
-        );
-        const promiseForImage = uploadBytesResumable(productsStorageRef, file);
-        promises.push(promiseForImage);
-        promiseForImage.on(
-          'state_changed',
-          (snapshot) => {
-            const prog = Math.round(
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            );
-            setUploadProgress(prog);
-          },
-          (error) => {
-            const err = error as Error;
-            throw new Error(err.message);
-          },
-          async () => {
-            await getDownloadURL(promiseForImage.snapshot.ref).then((url) => {
-              setMediaUrls((prevUrls) => [...prevUrls, url]);
-            });
-          }
-        );
-      });
-      // let updatedImages: MultipleImagesResponse = {} as MultipleImagesResponse;
-      Promise.all(uploadTasks);
-      return {
-        urls: mediaUrls,
-        progress: uploadProgress,
-      };
-    } catch (e) {
-      const err = e as Error;
-      throw new Error(err.message);
-    }
-  }
-
-  return {
-    addProductImage,
-    addProductImages,
-  };
-}
-
 export function useDeleteProduct(productId: string) {
   const productRef = useProductDocument(productId);
   return useCallback(async () => {
@@ -362,5 +251,96 @@ export function useProductsForHomeUsers() {
     products,
     isLoading,
     popularProducts,
+  };
+}
+
+export function useUpdateProduct(productId: string) {
+  const [progress, setProgress] = useState<number>(0);
+
+  const storage = useStorage();
+  const { product } = useProduct(productId);
+  const { user: authUser } = useProfile();
+  const productDoc = useProductDocument(productId);
+  const firebaseApp = useFirestore();
+  const { update: updateVerification } =
+    useUpdateVerificationRequestWithProduct();
+
+  async function uploadImages(files: File[], productId: string) {
+    try {
+      const promises: unknown[] = [];
+      files.forEach((file) => {
+        const productsStorageRef = ref(
+          storage,
+          `Products/${authUser.uid}/${productId}/${uuidv4()}`
+        );
+        promises.push(
+          uploadBytes(productsStorageRef, file).then((uploadResult) => {
+            setProgress((prevValue) => prevValue + 5);
+            return getDownloadURL(uploadResult.ref);
+          })
+        );
+      });
+      const photos: string[] = (await Promise.all(promises)) as string[];
+      return photos;
+    } catch (error) {
+      const err = error as Error;
+      throw new Error(err.message);
+    }
+  }
+
+  const update = useCallback(
+    async ({
+      files,
+      ...data
+    }: {
+      title: string;
+      description?: string;
+      tags?: string[];
+      files?: File[];
+      category: ProductCategory;
+      duration: number[];
+      address: {
+        state: ProductCategory;
+        pinCode: string;
+      };
+      pricePerMonth: number;
+    }) => {
+      try {
+        const batch = writeBatch(firebaseApp);
+        const payload = {
+          ...data,
+          tags: data.tags?.length ? data.tags : [''],
+          availability: true,
+          isUnderReview: true,
+          updatedAt: serverTimestamp(),
+        };
+        setProgress((prevValue) => prevValue + 10);
+        batch.update(productDoc, { ...payload });
+        setProgress((prevValue) => prevValue + 5);
+        await updateVerification(productId);
+        setProgress((prevValue) => prevValue + 5);
+        if (files?.length) {
+          // Update the DOC
+          // console.log("Called: ", console.log('alled: ');)
+          const images = await uploadImages(files, productId);
+          batch.update(productDoc, {
+            productMedia: product.productMedia
+              ? [...product.productMedia, ...images]
+              : [...images],
+          });
+          console.log('Gel');
+        }
+        setProgress((prevValue) => prevValue + 5);
+        await batch.commit();
+      } catch (e) {
+        const err = e as Error;
+        throw new Error(err.message);
+      }
+    },
+    []
+  );
+  return {
+    progress,
+    update,
   };
 }

@@ -116,7 +116,7 @@ function ModalInner(
                         {title}
                       </h3>
                     </div>
-                    {props.onClose ? (
+                    {props.onClose && props.isDismissable !== false ? (
                       <button
                         className="h-8 px-2 inline-flex items-center border rounded"
                         onClick={() => props.onClose?.()}

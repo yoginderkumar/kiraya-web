@@ -10,7 +10,7 @@ const config = {
     apiKey: 'AIzaSyDwrXJ9pLxI89qQEgdbCGLMDkcAPNsOIGc',
     appId: '1:328657533775:web:97f8c79df89c2ab563633a',
     authDomain: 'kiraya-dev.firebaseapp.com',
-    databaseURL: 'https://kiraya-dev.firebaseio.com',
+    databaseURL: 'https://kiraya-dev-default-rtdb.firebaseio.com/',
     // measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
     messagingSenderId: '328657533775',
     projectId: 'kiraya-dev',

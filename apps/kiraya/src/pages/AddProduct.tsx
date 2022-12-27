@@ -10,25 +10,17 @@ import {
   FormField,
   SearchSelect,
   FormAmountField,
-  PlusIcon,
   GearIcon,
-  CameraIcon,
   SpinnerIcon,
   Alert,
   CancelIcon,
   Circle,
-  FormImageFileField,
   FormMediaFileField,
   ModalFooter,
   ResetIcon,
 } from '@kiraya/kiraya-ui';
-import { Form, Formik, useFormik } from 'formik';
-import React, {
-  KeyboardEventHandler,
-  SyntheticEvent,
-  useEffect,
-  useState,
-} from 'react';
+import { Form, Formik } from 'formik';
+import React from 'react';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import * as Validator from 'yup';
@@ -347,7 +339,7 @@ function AddProductForm() {
                 </Stack>
                 {status ? <Alert status="error">{status}</Alert> : null}
               </Stack>
-              <Stack backgroundColor="red">
+              <Stack width="1/3">
                 <FormMediaFileField
                   label="Choose Images"
                   name="files"
@@ -356,7 +348,6 @@ function AddProductForm() {
                 />
               </Stack>
             </Inline>
-
             <ModalFooter
               position="fixed"
               bottom="0"

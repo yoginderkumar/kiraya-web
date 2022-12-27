@@ -10,7 +10,6 @@ import {
   Inline,
   Button,
   Heading,
-  Image,
   formikOnSubmitWithErrorHandling,
   FormField,
   SearchSelect,
@@ -19,17 +18,18 @@ import {
   CancelIcon,
   PencilIcon,
   TrashIcon,
-  LocationIcon,
   ModalFooter,
-  Alert,
+  FormMediaFileField,
+  DataLoadingFallback,
+  SpinnerIcon,
+  PreviewProductIcon,
+  SaveIcon,
 } from '@kiraya/kiraya-ui';
-import { pluralize } from '@kiraya/util-general';
 import { Form, Formik } from 'formik';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import * as Validator from 'yup';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
-import config from '../config';
 import { states } from '../constants/address';
 import ErrorBoundary from '../ErrorBoundary';
 import { categories } from '../Products/data';
@@ -42,7 +42,7 @@ export default function YourProductPage() {
   return (
     <ErrorBoundary>
       <SuspenseWithPerf
-        fallback={'Loading your product'}
+        fallback={<DataLoadingFallback label="Loading your product" />}
         traceId="loading_book_details"
       >
         <YourProduct key={productId} productId={productId} />
@@ -52,29 +52,33 @@ export default function YourProductPage() {
 }
 
 const MAX_AMOUNT = 30000;
+const MAX_FILE_SIZE = 5120; // 5MB
 const availableDurations = [3, 6, 9, 12, 15];
-
 const updateProductValidationSchema = Validator.object().shape({
   title: Validator.string()
     .required(`Please provide a name for your account`)
     .max(191, 'Name should be bellow 191 characters'),
-  category: Validator.object()
-    .shape({
-      id: Validator.string(),
-    })
-    .required('Please add a category'),
+  category: Validator.string().required(
+    `Please choose a valid category for your product.`
+  ),
+  state: Validator.string().required(`Please choose a valid state.`),
   duration: Validator.array().min(
     1,
     'Please select any duration of your choice'
   ),
-  state: Validator.object()
-    .shape({
-      id: Validator.string(),
-    })
-    .required('Please select a state'),
-  pinCode: Validator.string()
-    .required(`Please provide a pin code for this product`)
-    .length(6, 'Please enter a valid Pincode.'),
+  files: Validator.array(
+    Validator.mixed().test(
+      'fileSize',
+      'File is too large. Please add image with a file size of 5MB maximum',
+      (value: File | null) => {
+        if (value && value.size / 1024 > MAX_FILE_SIZE) {
+          return false;
+        }
+        return true;
+      }
+    )
+  ),
+  pinCode: Validator.string().required(`Please enter a valid pin code.`),
   pricePerMonth: Validator.number()
     .required('Please enter the price per month')
     .positive('The amount should be a positive number')
@@ -85,430 +89,432 @@ const updateProductValidationSchema = Validator.object().shape({
 });
 
 export function YourProduct({ productId }: { productId: string }) {
-  const navigate = useNavigate();
   const { product } = useProduct(productId);
-  const { updateProductData } = useUpdateProduct(product.uid);
-  const initialValues = useMemo(() => {
-    console.log('Produc: ', product.duration);
-    return {
-      tagInput: '' as string,
-      title: product.title as string,
-      tags: product.tags as string[],
-      pricePerMonth: product.pricePerMonth as number,
-      description: product.description as string,
-      duration: product.duration as number[],
-      category: product.category as { id: string; label: string },
-      state: product.address?.state as { id: string; label: string },
-      pinCode: product.address?.pinCode as string,
-    };
-  }, [product]);
-
-  console.log('Ibni: ', initialValues.duration);
   return (
     <Stack width="full" gap="16" backgroundColor="white">
       <Stack maxWidth="full" gap="8" marginY="6">
         <Stack maxWidth="full" gap="2">
           <Box paddingX="6">
-            <Box paddingY="4">
-              <Heading fontSize="sm" fontWeight="medium" color="gray500">
-                <Link to="/profile">Profile</Link> |{' '}
-                <Link to="/profile/your-products">Your Products</Link> | Product
-              </Heading>
-            </Box>
-            <Stack gap="6">
+            <Heading fontSize="sm" fontWeight="medium" color="gray500">
+              <Link to="/profile">Profile</Link> |{' '}
+              <Link to="/profile/your-products">Your Products</Link> |{' '}
+              {product.title}
+            </Heading>
+            <Stack gap="4" paddingY="4">
               <Text fontSize="lg" fontWeight="semibold">
                 Your Product
               </Text>
-              <Formik
-                initialValues={{
-                  isEditEnabled: false as boolean,
-                  ...initialValues,
-                }}
-                validationSchema={updateProductValidationSchema}
-                validateOnBlur={false}
-                validateOnChange={false}
-                onSubmit={formikOnSubmitWithErrorHandling(
-                  async (values, actions) => {
-                    await updateProductData({
-                      title: values.title,
-                      tags: values.tags,
-                      pricePerMonth: values.pricePerMonth,
-                      description: values.description,
-                      duration: values.duration,
-                      category: values.category,
-                      address: { state: values.state, pinCode: values.pinCode },
-                    });
-                    toast.success('You have updated the product successfully!');
-                    actions.setValues({ ...values, ...initialValues });
-                    actions.setFieldValue('isEditEnabled', false);
-                  }
-                )}
-              >
-                {({
-                  status,
-                  values,
-                  isSubmitting,
-                  setValues,
-                  setFieldValue,
-                }) => (
-                  <Form noValidate>
-                    <Stack>
-                      <Inline gap="6" justifyContent="between">
-                        <Stack width="1/2" gap="1" paddingY="2">
-                          <Inline alignItems="center" gap="4" width="full">
-                            <Box width="full">
-                              <FormField
-                                readOnly={!values.isEditEnabled}
-                                name="title"
-                                label="Title"
-                                placeholder="Please enter title"
-                              />
-                            </Box>
-                            <Box width="full">
-                              <FormField
-                                readOnly={!values.isEditEnabled}
-                                name="description"
-                                label="Description"
-                                placeholder="Please enter description here"
-                              />
-                            </Box>
-                          </Inline>
-                          <FormField
-                            readOnly={!values.isEditEnabled}
-                            name="category"
-                            placeholder="Choose Category"
-                            label={`Category`}
-                            renderInput={({ field, form }) => {
-                              return (
-                                <SearchSelect
-                                  searchPlaceholder="Choose Category"
-                                  control="input"
-                                  readonly={Boolean(!values.isEditEnabled)}
-                                  value={values.category}
-                                  options={categories}
-                                  onChange={(option) => {
-                                    setFieldValue('category', option);
-                                  }}
-                                />
-                              );
-                            }}
-                          />
-                          <Inline gap="4">
-                            <FormField
-                              readOnly={!values.isEditEnabled}
-                              name="state"
-                              placeholder="Choose Location"
-                              label={`Location`}
-                              renderInput={() => {
-                                return (
-                                  <SearchSelect
-                                    searchPlaceholder="Choose Location"
-                                    control="input"
-                                    readonly={Boolean(!values.isEditEnabled)}
-                                    value={values.state}
-                                    options={states}
-                                    onChange={(option) => {
-                                      setFieldValue('state', option);
-                                    }}
-                                  />
-                                );
-                              }}
-                            />
-                            <Box width="full">
-                              <FormField
-                                readOnly={!values.isEditEnabled}
-                                name="pinCode"
-                                label="Pin Code"
-                                placeholder="Please enter pin code"
-                              />
-                            </Box>
-                          </Inline>
-                          <FormAmountField
-                            name="pricePerMonth"
-                            rawName="pricePerMonth"
-                            label="Price (per month)"
-                            secondaryLabel="required"
-                            readOnly={!values.isEditEnabled}
-                            value={product.pricePerMonth}
-                            placeholder="eg. 890 or 100"
-                          />
-                          <Stack marginBottom="6">
-                            <FormField
-                              noMargin
-                              readOnly={!values.isEditEnabled}
-                              name="tagInput"
-                              tabIndex={0}
-                              label="Choose Tags"
-                              placeholder="Enter your tags"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  setFieldValue('tagInput', '');
-                                  setFieldValue('tags', [
-                                    ...values.tags,
-                                    values.tagInput,
-                                  ]);
-                                }
-                                e.stopPropagation();
-                              }}
-                            />
-                            <Inline gap="2" flexWrap="wrap" marginTop="3">
-                              {values.tags.map((tag) => (
-                                <Inline
-                                  key={tag}
-                                  paddingX="3"
-                                  paddingY="1"
-                                  rounded="md"
-                                  gap="2"
-                                  alignItems="center"
-                                  backgroundColor="gray100"
-                                >
-                                  <Text fontWeight="medium" fontSize="sm">
-                                    {tag}
-                                  </Text>
-                                  <Circle
-                                    size="4"
-                                    cursor="pointer"
-                                    backgroundColor="gray500"
-                                    onClick={() => {
-                                      if (values.isEditEnabled) {
-                                        setFieldValue(
-                                          'tags',
-                                          values.tags.filter(
-                                            (filterTag) => filterTag !== tag
-                                          )
-                                        );
-                                      }
-                                    }}
-                                  >
-                                    <CancelIcon size="3" color="white" />
-                                  </Circle>
-                                </Inline>
-                              ))}
-                            </Inline>
-                          </Stack>
-                        </Stack>
-                        <Stack gap="6" className="w-1/3" paddingBottom="12">
-                          {product.productMedia?.length ? (
-                            <Stack gap="3">
-                              <Inline flexWrap="wrap" gap="4">
-                                {product.productMedia.map((image) => (
-                                  <Box key={image} className="w-[45%]">
-                                    <Image
-                                      rounded="md"
-                                      imageLabel={product.title}
-                                      thumbUrl={image}
-                                      imageUrl={image}
-                                    />
-                                  </Box>
-                                ))}
-                              </Inline>
-                              <Box paddingY="3">
-                                <FormField
-                                  noMargin
-                                  name="duration"
-                                  readOnly={!values.isEditEnabled}
-                                  label="Duration"
-                                  renderInput={() => (
-                                    <Inline gap="2">
-                                      <Inline
-                                        borderWidth="1"
-                                        rounded="md"
-                                        className="max-w-fit"
-                                        alignItems="center"
-                                        justifyContent="between"
-                                      >
-                                        {availableDurations.map(
-                                          (option, index) => (
-                                            <Inline
-                                              key={option}
-                                              paddingY="1"
-                                              width="10"
-                                              height="10"
-                                              rounded="md"
-                                              justifyContent="center"
-                                              alignItems="center"
-                                              textAlign="center"
-                                              cursor="pointer"
-                                              borderRightWidth="1"
-                                              borderColor="white"
-                                              backgroundColor={
-                                                values.duration.includes(option)
-                                                  ? index % 2 === 0
-                                                    ? 'green500'
-                                                    : 'blue900'
-                                                  : 'transparent'
-                                              }
-                                              onClick={() => {
-                                                if (values.isEditEnabled) {
-                                                  setFieldValue(
-                                                    'duration',
-                                                    values.duration.includes(
-                                                      option
-                                                    )
-                                                      ? values.duration.filter(
-                                                          (time) =>
-                                                            time !== option
-                                                        )
-                                                      : [
-                                                          ...values.duration,
-                                                          option,
-                                                        ]
-                                                  );
-                                                }
-                                              }}
-                                            >
-                                              <Text
-                                                fontWeight="semibold"
-                                                color={
-                                                  values.duration.includes(
-                                                    option
-                                                  )
-                                                    ? 'white'
-                                                    : undefined
-                                                }
-                                              >
-                                                {option}
-                                              </Text>
-                                            </Inline>
-                                          )
-                                        )}
-                                      </Inline>
-                                      <Inline
-                                        alignSelf="stretch"
-                                        alignItems="end"
-                                      >
-                                        <Text fontSize="sm">Months</Text>
-                                      </Inline>
-                                    </Inline>
-                                  )}
-                                />
-                              </Box>
-                            </Stack>
-                          ) : null}
-                          {product.isUnderReview ? (
-                            <Box
-                              paddingY="1"
-                              paddingX="2"
-                              rounded="md"
-                              backgroundColor="yellow100"
-                              color="yellow800"
-                            >
-                              <Text fontSize="sm">
-                                Your product is under review by the team at{' '}
-                                <Text as="span" fontWeight="semibold">
-                                  {config.appTitle}.{' '}
-                                </Text>
-                                Check our review process{' '}
-                                <Text
-                                  as="span"
-                                  fontWeight="semibold"
-                                  color="blue900"
-                                >
-                                  Here
-                                </Text>
-                              </Text>
-                            </Box>
-                          ) : (
-                            <Box
-                              paddingY="1"
-                              paddingX="2"
-                              rounded="md"
-                              backgroundColor="green100"
-                              color="green900"
-                            >
-                              <Text fontSize="sm">
-                                Your product is reviewed by the team at{' '}
-                                <Text as="span" fontWeight="semibold">
-                                  {config.appTitle}.{' '}
-                                </Text>
-                                Editing this product will put this under review
-                                again. Check our review process{' '}
-                                <Text
-                                  as="span"
-                                  fontWeight="semibold"
-                                  color="blue900"
-                                >
-                                  Here
-                                </Text>
-                              </Text>
-                            </Box>
-                          )}
-                          {status ? (
-                            <Alert status="error" marginBottom="0">
-                              {status}
-                            </Alert>
-                          ) : null}
-                          {values.isEditEnabled ? (
-                            <Box as="hr" bgColor="gray500" width="full" />
-                          ) : null}
-                          {values.isEditEnabled ? (
-                            <Inline gap="4" width="full" justifyContent="end">
-                              <Button
-                                size="lg"
-                                disabled={isSubmitting}
-                                onClick={() => {
-                                  setValues({ ...values, ...initialValues });
-                                  setFieldValue('isEditEnabled', false);
-                                }}
-                              >
-                                <Box>
-                                  <CancelIcon />
-                                </Box>
-                                Cancel
-                              </Button>
-                              <Button
-                                disabled={isSubmitting}
-                                size="lg"
-                                type="submit"
-                              >
-                                {isSubmitting ? 'Saving...' : 'Save'}
-                              </Button>
-                            </Inline>
-                          ) : (
-                            <Inline gap="4">
-                              <Button
-                                fullWidth
-                                onClick={() => {
-                                  setFieldValue('isEditEnabled', true);
-                                }}
-                                size="lg"
-                                disabled={values.isEditEnabled}
-                              >
-                                <PencilIcon />
-                                Edit
-                              </Button>
-                              <DeleteProductInModal
-                                productId={product.uid}
-                                onSuccess={() => {
-                                  navigate('/profile/your-products/');
-                                }}
-                              >
-                                {({ onOpen }) => (
-                                  <Button
-                                    size="lg"
-                                    onClick={onOpen}
-                                    fullWidth
-                                    status="error"
-                                  >
-                                    <Box>
-                                      <TrashIcon />
-                                    </Box>
-                                    Delete
-                                  </Button>
-                                )}
-                              </DeleteProductInModal>
-                            </Inline>
-                          )}
-                        </Stack>
-                      </Inline>
-                    </Stack>
-                  </Form>
-                )}
-              </Formik>
+              <EditProductForm product={product} />
             </Stack>
           </Box>
         </Stack>
       </Stack>
+    </Stack>
+  );
+}
+
+function EditProductForm({ product }: { product: Product }) {
+  const navigate = useNavigate();
+  const { progress, update } = useUpdateProduct(product.uid);
+
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const initialValues = useMemo(() => {
+    return {
+      title: product.title as string,
+      tagInput: '' as string,
+      description: product.description as string,
+      tags: product.tags as string[],
+      category: product.category.label as string,
+      categoryObj: product.category as { id: string; label: string } | null,
+      duration: product.duration as number[],
+      pricePerMonth: product.pricePerMonth as number,
+      files: [] as File[],
+      imageUrls: product.productMedia as string[],
+      state: product.address?.state.label as string,
+      pinCode: product.address?.pinCode as string,
+      stateObj: product.address?.state as { id: string; label: string } | null,
+    };
+  }, [product]);
+
+  return (
+    <Stack maxWidth="full" position="relative">
+      <Formik
+        initialValues={initialValues}
+        validationSchema={updateProductValidationSchema}
+        validateOnBlur={false}
+        validateOnChange={false}
+        onSubmit={formikOnSubmitWithErrorHandling(async (values, actions) => {
+          if (values.stateObj === null) {
+            actions.setFieldError('state', 'Pick a valid state');
+            return;
+          }
+          if (!values.imageUrls.length && !values.files.length) {
+            actions.setFieldError('files', 'Please pick at least 1 image.');
+            return;
+          }
+          const payload = {
+            title: values.title,
+            tags: values.tags,
+            description: values.description,
+            category: values.categoryObj || { id: 'some', label: 'test' },
+            duration: values.duration,
+            files: values.files,
+            pricePerMonth: Number(values.pricePerMonth),
+            address: {
+              state: { ...values.stateObj },
+              pinCode: values.pinCode,
+            },
+          };
+          try {
+            await update(payload);
+            setIsEditing(false);
+            toast.success('Your changes are saved successfully!');
+          } catch (e) {
+            toast.error('Something went wrong!');
+            console.log(e);
+          }
+        })}
+      >
+        {({
+          values,
+          status,
+          isSubmitting,
+          resetForm,
+          submitForm,
+          setValues,
+          setFieldValue,
+        }) => (
+          <Form noValidate>
+            <Inline gap="4">
+              <Stack className="w-2/3">
+                <Inline width="full" gap="4">
+                  <Box width="full">
+                    <FormField
+                      name="title"
+                      label="Enter Title"
+                      disabled={!isEditing}
+                      placeholder="Please enter title"
+                    />
+                  </Box>
+                  <Box width="full">
+                    <FormField
+                      name="description"
+                      disabled={!isEditing}
+                      label="Enter Description"
+                      placeholder="Please enter description here"
+                    />
+                  </Box>
+                </Inline>
+                <FormField
+                  name="category"
+                  placeholder="Choose Category"
+                  label={`Choose Category`}
+                  disabled={!isEditing}
+                  renderInput={({ field, form }) => {
+                    return (
+                      <SearchSelect
+                        searchPlaceholder="Choose Category"
+                        control="input"
+                        readonly={!isEditing}
+                        value={values.categoryObj}
+                        options={categories}
+                        onChange={(option) => {
+                          setFieldValue('category', option?.label);
+                          setFieldValue('categoryObj', option);
+                          setFieldValue('tags', [
+                            ...values.tags,
+                            option?.label,
+                          ]);
+                          if (option === null) {
+                            setFieldValue('category', '');
+                          }
+                        }}
+                      />
+                    );
+                  }}
+                />
+                <Inline gap="4">
+                  <Box width="full">
+                    <FormField
+                      name="state"
+                      disabled={!isEditing}
+                      placeholder="Choose Location"
+                      label={`Location`}
+                      renderInput={() => {
+                        return (
+                          <SearchSelect
+                            searchPlaceholder="Choose Location"
+                            control="input"
+                            value={values.state}
+                            options={states}
+                            readonly={!isEditing}
+                            onChange={(option) => {
+                              setFieldValue('state', option?.label);
+                              setFieldValue('stateObj', option);
+                            }}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                  <Box width="full">
+                    <FormField
+                      name="pinCode"
+                      label="Pin Code"
+                      disabled={!isEditing}
+                      placeholder="Please enter pin code"
+                    />
+                  </Box>
+                </Inline>
+                <FormField
+                  name="duration"
+                  label="Choose Duration"
+                  disabled={!isEditing}
+                  renderInput={() => (
+                    <Inline gap="2">
+                      <Inline
+                        borderWidth="1"
+                        rounded="md"
+                        className="max-w-fit"
+                        alignItems="center"
+                        justifyContent="between"
+                      >
+                        {availableDurations.map((option, index) => (
+                          <Inline
+                            key={option}
+                            paddingY="1"
+                            width="10"
+                            height="10"
+                            rounded="md"
+                            justifyContent="center"
+                            alignItems="center"
+                            textAlign="center"
+                            cursor="pointer"
+                            borderRightWidth="1"
+                            borderColor="white"
+                            backgroundColor={
+                              values.duration.includes(option)
+                                ? index % 2 === 0
+                                  ? 'green500'
+                                  : 'blue900'
+                                : 'transparent'
+                            }
+                            onClick={() => {
+                              if (!isEditing) {
+                                return;
+                              }
+                              setFieldValue(
+                                'duration',
+                                values.duration.includes(option)
+                                  ? values.duration.filter(
+                                      (time) => time !== option
+                                    )
+                                  : [...values.duration, option]
+                              );
+                            }}
+                          >
+                            <Text
+                              fontWeight="semibold"
+                              color={
+                                values.duration.includes(option)
+                                  ? 'white'
+                                  : undefined
+                              }
+                            >
+                              {option}
+                            </Text>
+                          </Inline>
+                        ))}
+                      </Inline>
+                      <Inline alignSelf="stretch" alignItems="end">
+                        <Text fontSize="sm">Months</Text>
+                      </Inline>
+                    </Inline>
+                  )}
+                />
+                <FormAmountField
+                  name="pricePerMonth"
+                  rawName="pricePerMonth"
+                  label="Price (per month)"
+                  secondaryLabel="required"
+                  required
+                  disabled={!isEditing}
+                  placeholder="eg. 890 or 100"
+                />
+                <Stack marginBottom="6" paddingBottom="24">
+                  <FormField
+                    noMargin
+                    name="tagInput"
+                    tabIndex={0}
+                    label="Choose Tags"
+                    disabled={!isEditing}
+                    placeholder="Enter your tags"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setFieldValue('tagInput', '');
+                        setFieldValue('tags', [
+                          ...values.tags,
+                          values.tagInput,
+                        ]);
+                      }
+                      e.stopPropagation();
+                    }}
+                  />
+                  <Inline gap="2" flexWrap="wrap" marginTop="3">
+                    {values.tags.map((tag) => (
+                      <Inline
+                        key={tag}
+                        paddingX="3"
+                        paddingY="1"
+                        rounded="md"
+                        gap="2"
+                        alignItems="center"
+                        backgroundColor="gray100"
+                      >
+                        <Text fontWeight="medium" fontSize="sm">
+                          {tag}
+                        </Text>
+                        <Circle
+                          size="4"
+                          cursor="pointer"
+                          backgroundColor="gray500"
+                          onClick={() => {
+                            setFieldValue(
+                              'tags',
+                              values.tags.filter(
+                                (filterTag) => filterTag !== tag
+                              )
+                            );
+                          }}
+                        >
+                          <CancelIcon size="3" color="white" />
+                        </Circle>
+                      </Inline>
+                    ))}
+                  </Inline>
+                  {/* {status ? (
+                    <Alert status="error" margin="0">
+                      {status}
+                    </Alert>
+                  ) : null} */}
+                </Stack>
+              </Stack>
+              <Stack width="1/3">
+                <FormMediaFileField
+                  label="Choose Images"
+                  name="files"
+                  disabled={!isEditing}
+                  imageFiles={values.files}
+                  savedImages={values.imageUrls}
+                  maxMediaFiles={4}
+                  onRemove={(index) =>
+                    setFieldValue(
+                      'imageUrls',
+                      values.imageUrls.filter((_, i) => i !== index)
+                    )
+                  }
+                />
+              </Stack>
+            </Inline>
+            <ModalFooter
+              position="fixed"
+              bottom="0"
+              left="0"
+              className="w-[100%]"
+              backgroundColor="white"
+              paddingY="6"
+              paddingX="4"
+            >
+              {!isEditing ? (
+                <>
+                  <Button
+                    level="primary"
+                    onClick={() => setIsEditing(true)}
+                    size="lg"
+                    title="Edit Your Product"
+                  >
+                    <Box>
+                      <PencilIcon />
+                    </Box>
+                    Update
+                  </Button>
+                  <Button
+                    size="lg"
+                    status="success"
+                    title="Preview Your Product"
+                    onClick={() => resetForm()}
+                  >
+                    <Box>
+                      <PreviewProductIcon />
+                    </Box>
+                    Preview Product
+                  </Button>
+                  <DeleteProductInModal
+                    productId={product.uid}
+                    onSuccess={() => navigate('/profile/your-products')}
+                  >
+                    {({ onOpen }) => (
+                      <Button
+                        size="lg"
+                        status="error"
+                        title="Cancel Editing"
+                        onClick={onOpen}
+                      >
+                        <Box>
+                          <TrashIcon />
+                        </Box>
+                        Delete
+                      </Button>
+                    )}
+                  </DeleteProductInModal>
+                </>
+              ) : (
+                <>
+                  <Button
+                    level="primary"
+                    onClick={submitForm}
+                    size="lg"
+                    title="Save Changes"
+                    disabled={
+                      JSON.stringify(initialValues) ===
+                        JSON.stringify(values) || isSubmitting
+                    }
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <SpinnerIcon color="white" />
+                        Saving... ({progress}
+                        %)
+                      </>
+                    ) : (
+                      <>
+                        <Box>
+                          <SaveIcon />
+                        </Box>
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    size="lg"
+                    title="Cancel Editing"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setValues({ ...initialValues });
+                    }}
+                  >
+                    <Box>
+                      <CancelIcon />
+                    </Box>
+                    Cancel
+                  </Button>
+                </>
+              )}
+            </ModalFooter>
+          </Form>
+        )}
+      </Formik>
     </Stack>
   );
 }
