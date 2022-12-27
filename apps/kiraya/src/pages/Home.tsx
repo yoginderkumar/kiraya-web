@@ -13,15 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import { HomeBanner } from '../assets/images';
 import { ProductCard, SkeletonProductCard } from '../Products/Products';
 
-const categories = [
-  'books',
-  'musicalInstruments',
-  'homeAppliances',
-  'furniture',
-  'decor',
-  'storage',
-];
-
 export default function Home() {
   const { isLoading, popularProducts } = useProductsForHomeUsers();
 

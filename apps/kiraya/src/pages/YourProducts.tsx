@@ -6,7 +6,6 @@ import {
   Inline,
   Button,
   Heading,
-  ButtonLink,
   getButtonClassName,
 } from '@kiraya/kiraya-ui';
 import React from 'react';
@@ -16,7 +15,6 @@ import { ProductCard } from '../Products/Products';
 export default function YourProducts() {
   const navigate = useNavigate();
   const { products } = useProductsForOwner();
-  console.log('Propd: ', products);
   return (
     <Stack width="full" gap="16" backgroundColor="white">
       <Stack maxWidth="full" gap="8" marginY="6">

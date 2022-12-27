@@ -14,7 +14,7 @@ import { FieldProps, Form, Formik } from 'formik';
 import React, { useMemo } from 'react';
 import * as Validator from 'yup';
 import { SuspenseWithPerf } from 'reactfire';
-import { EmailValidator, PhoneNumberValidator } from '@kiraya/util-general';
+import { PhoneNumberValidator } from '@kiraya/util-general';
 
 export function UpdateProfileInDialog({
   children,

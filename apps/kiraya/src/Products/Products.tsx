@@ -11,16 +11,12 @@ import {
   Modal,
   ModalBody,
   ModalFooter,
-  PencilIcon,
-  SpinnerIcon,
   Stack,
   Text,
-  TrashIcon,
-  LazyImage,
   useOverlayTriggerState,
 } from '@kiraya/kiraya-ui';
-import Slider from 'react-slick';
-import React, { useRef, useState } from 'react';
+// import Slider from 'react-slick';
+import React from 'react';
 import { Categories } from './data';
 import { iconsForCategories } from './index';
 import { Form, Formik } from 'formik';

@@ -7,7 +7,6 @@ import {
   Stack,
   Text,
   Heading,
-  WhatsAppIcon,
   Inline,
   MailIcon,
   Button,
@@ -15,7 +14,6 @@ import {
 } from '@kiraya/kiraya-ui';
 import React from 'react';
 import config from './config';
-// import { WhatsAppContactLink } from './HelpDocs';
 
 type ErrorHandler = (error: Error, info: React.ErrorInfo) => void;
 type ErrorHandlingComponent<Props> = (
@@ -85,16 +83,16 @@ const ErrorBoundary = Catch(function ErrorBoundary(
       window.location.reload();
       return null;
     }
-    // if (config && !config) {
-    //   logError(error, {
-    //     contexts: {
-    //       react: { componentStack },
-    //     },
-    //     tags: {
-    //       on: 'render',
-    //     },
-    //   });
-    // }
+    if (config && !config) {
+      logError(error, {
+        contexts: {
+          react: { componentStack },
+        },
+        tags: {
+          on: 'render',
+        },
+      });
+    }
     const defaultRenderedMessage = <DisplayError error={error} />;
     return (
       <>
@@ -264,19 +262,8 @@ ${error.stack}
               </Box>
               <hr />
               <Inline gap="8">
-                {/* <WhatsAppContactLink
-                  text={`Hi ${config.appTitle} Team,
-
-I received following error when trying to access the page ${window.location.href}:
----
-${error.message}
----
-Please look into it and contact me if you need more information.`}
-                >
-                  <WhatsAppIcon /> WhatsApp
-                </WhatsAppContactLink> */}
                 <a
-                  href={`mailto:yoginderkumar3520@gmail.com?subject=${encodeURI(
+                  href={`mailto:yoginderkumar2510@gmail.com?subject=${encodeURI(
                     'Error on web app'
                   )}&body=${encodeURI(`Hi ${config.appTitle} Team,
 

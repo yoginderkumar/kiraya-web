@@ -2,9 +2,7 @@ import React from 'react';
 import { useLogout } from '@kiraya/data-store/auth';
 import { useProfile } from '@kiraya/data-store/users';
 import {
-  Alert,
   Button,
-  InformationCircleIcon,
   LogoutIcon,
   PencilIcon,
   Box,
@@ -12,15 +10,9 @@ import {
   Heading,
   Inline,
   Stack,
-  InformationWarningIcon,
   Time,
-  //   Tooltip,
-  //   CheckCircleIcon,
 } from '@kiraya/kiraya-ui';
-import { useEffect } from 'react';
 import { useUser } from 'reactfire';
-import config from '../config';
-import appImageSrc from '../Profile/app_image.png';
 import { UpdateProfileInDialog } from '../Profile';
 
 export default function ProfilePage() {

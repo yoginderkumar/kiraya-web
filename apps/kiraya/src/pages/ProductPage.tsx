@@ -1,13 +1,8 @@
+import { useProduct } from '@kiraya/data-store/products';
 import {
-  useProduct,
-  useProductsForHomeUsers,
-} from '@kiraya/data-store/products';
-import {
-  ArrowRightIcon,
   Box,
   Button,
   DataLoadingFallback,
-  Heading,
   Inline,
   LocationIcon,
   RaiseIcon,
@@ -15,20 +10,9 @@ import {
   Text,
 } from '@kiraya/kiraya-ui';
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
-import { HomeBanner } from '../assets/images';
 import ErrorBoundary from '../ErrorBoundary';
-import { ProductCard, SkeletonProductCard } from '../Products/Products';
-
-const categories = [
-  'books',
-  'musicalInstruments',
-  'homeAppliances',
-  'furniture',
-  'decor',
-  'storage',
-];
 
 export default function ProductsPage() {
   const { productId } = useParams();
@@ -53,21 +37,13 @@ function ProductDashboard({ productId }: { productId: string }) {
     address,
     pricePerMonth,
     description,
-    ownerInfo,
+    // ownerInfo,
     productMedia,
   } = product;
   const [activeImage, setActiveImage] = useState<{
     index: number;
     url: string;
   } | null>(productMedia?.length ? { index: 0, url: productMedia[0] } : null);
-  console.log('productId: ', ownerInfo);
-
-  const navigate = useNavigate();
-
-  function onProductClick(prodId: string) {
-    navigate(`/products/${prodId}`);
-    return;
-  }
 
   return (
     <Box

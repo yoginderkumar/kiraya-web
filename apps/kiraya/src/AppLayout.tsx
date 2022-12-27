@@ -27,7 +27,6 @@ import { AuthenticationInModal } from './Auth';
 import { useProfile } from '@kiraya/data-store/users';
 import config from './config';
 import { useLogout } from '@kiraya/data-store/auth';
-import { SuspenseWithPerf } from 'reactfire';
 
 export function AppLayout() {
   return (
@@ -45,6 +44,7 @@ export function Header() {
   const { user } = useProfile();
   const inputRef = useRef<HTMLInputElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSearchInFocus, setSearchInFocus] = useState<boolean>(false);
   function onInputFocus() {
     setTimeout(() => {
