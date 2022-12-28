@@ -27,7 +27,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
 import ErrorBoundary from '../ErrorBoundary';
 import { UserAvatar } from '../Profile';
-import { Formik, useFormik } from 'formik';
+import { useFormik } from 'formik';
 
 export default function ProductsPage() {
   const { productId } = useParams();
@@ -106,7 +106,7 @@ function ProductDashboard({ productId }: { productId: string }) {
     setImageLoading(false);
   }
 
-  const { isSubmitting, submitForm, status, handleChange } = useFormik({
+  const { isSubmitting, submitForm, status } = useFormik({
     initialValues: {},
     onSubmit: formikOnSubmitWithErrorHandling(async () => {
       await sendRequest({
