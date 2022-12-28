@@ -2,12 +2,15 @@ import { useProfile } from '@kiraya/data-store/users';
 import {
   Box,
   Button,
+  Circle,
   FormField,
   Modal,
   ModalBody,
   ModalFooter,
   PhoneInput,
   SpinnerIcon,
+  Text,
+  UserIcon,
 } from '@kiraya/kiraya-ui';
 import { useOverlayTriggerState } from '@react-stately/overlays';
 import { FieldProps, Form, Formik } from 'formik';
@@ -15,6 +18,7 @@ import React, { useMemo } from 'react';
 import * as Validator from 'yup';
 import { SuspenseWithPerf } from 'reactfire';
 import { PhoneNumberValidator } from '@kiraya/util-general';
+import { getColorForString } from 'generate-colors';
 
 export function UpdateProfileInDialog({
   children,
@@ -130,5 +134,52 @@ export function UpdateProfile({
         </Form>
       )}
     </Formik>
+  );
+}
+
+type UserAvatarProps = {
+  uid?: string;
+  photoUrl?: string;
+  name: string;
+  size?: React.ComponentProps<typeof Box>['size'];
+  fontSize?: React.ComponentProps<typeof Text>['fontSize'];
+};
+export function UserAvatar({
+  uid,
+  name,
+  size,
+  fontSize,
+  photoUrl,
+}: UserAvatarProps) {
+  const [r, g, b] = getColorForString(uid || name || photoUrl || 'ku');
+  return (
+    <Circle
+      size={size || '14'}
+      key={uid || `avatar_${photoUrl}_${name}`}
+      style={{
+        color: `rgb(${r}, ${g}, ${b})`,
+        background: `rgba(${r}, ${g}, ${b}, .1)`,
+        borderRadius: 100,
+      }}
+    >
+      {photoUrl?.length ? (
+        <img
+          src={photoUrl}
+          className="rounded-full"
+          referrerPolicy="no-referrer"
+          alt={name}
+        />
+      ) : name.length ? (
+        <Text
+          textTransform="uppercase"
+          fontSize={fontSize || 'lg'}
+          fontWeight="semibold"
+        >
+          {name[0]}
+        </Text>
+      ) : (
+        <UserIcon />
+      )}
+    </Circle>
   );
 }

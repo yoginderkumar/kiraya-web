@@ -74,3 +74,12 @@ export function pluralize(word: string, count: number | Array<unknown> = 2) {
   }
   return __PLURALIZED_CACHE__[key];
 }
+
+export function maskString(string: string) {
+  const first4 = string.substring(0, 4);
+  const last2 = string.substring(string.length - 2);
+  const mask = string
+    .substring(4, string.length - 2)
+    .replace(/[A-za-z0-9]/g, '*');
+  return first4 + mask + last2;
+}
