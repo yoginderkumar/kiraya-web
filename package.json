@@ -24,6 +24,7 @@
     "eval-num-expr": "^0.2.4",
     "firebase": "9.14.0",
     "formik": "2.2.9",
+    "generate-colors": "^1.4.2",
     "plural": "^1.1.0",
     "postcss": "8.4.16",
     "qs": "^6.11.0",

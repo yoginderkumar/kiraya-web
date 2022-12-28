@@ -12,6 +12,7 @@ export * from './lib/Button';
 export * from './lib/Circle';
 export * from './lib/Inline';
 export * from './lib/Select';
+export * from './lib/Skeletons';
 export * from './lib/PhoneInput';
 export * from './lib/ImageSlider';
 export * from './lib/DataLoadingFallback';
