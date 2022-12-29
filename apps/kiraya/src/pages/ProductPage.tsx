@@ -28,6 +28,7 @@ import { SuspenseWithPerf } from 'reactfire';
 import ErrorBoundary from '../ErrorBoundary';
 import { UserAvatar } from '../Profile';
 import { useFormik } from 'formik';
+import config from '../config';
 
 export default function ProductsPage() {
   const { productId } = useParams();
@@ -35,7 +36,7 @@ export default function ProductsPage() {
   return (
     <ErrorBoundary>
       <SuspenseWithPerf
-        fallback={<DataLoadingFallback label="Loading book details" />}
+        fallback={<DataLoadingFallback label="Loading product details" />}
         traceId="loading_book_details"
       >
         <ProductDashboard key={productId} productId={productId} />
@@ -195,12 +196,14 @@ function ProductDashboard({ productId }: { productId: string }) {
               </Inline>
             ) : null}
           </Stack>
-          <Stack className="w-[40%]" paddingX="4" paddingTop="6" gap="4">
-            <Text fontWeight="semibold" className="line-clamp-2" fontSize="3xl">
+          <Stack className="w-[45%]" paddingX="14" paddingTop="6" gap="4">
+            <Text fontWeight="semibold" className="line-clamp-2" fontSize="2xl">
               {title}
             </Text>
             {description?.length ? (
-              <Text className="pl-2">{description}</Text>
+              <Text className="pl-2" fontSize="sm">
+                {description}
+              </Text>
             ) : null}
             <Stack paddingLeft="2" gap="1">
               <Text fontWeight="semibold" fontSize="md">
@@ -217,10 +220,10 @@ function ProductDashboard({ productId }: { productId: string }) {
               </Text>
             </Stack>
             <Stack paddingLeft="2" gap="1">
-              <Text color="blue900" fontWeight="semibold" fontSize="md">
+              <Text color="blue900" fontWeight="semibold" fontSize="lg">
                 Price Per Month
               </Text>
-              <Text color="blue900" fontWeight="semibold">
+              <Text color="blue900" fontWeight="semibold" fontSize="lg">
                 ₹{pricePerMonth}
               </Text>
             </Stack>
@@ -273,7 +276,7 @@ function ProductDashboard({ productId }: { productId: string }) {
                 <Text fontWeight="semibold" fontSize="lg">
                   Owner Details
                 </Text>
-                <Inline gap="3">
+                <Inline gap="3" alignItems="center">
                   <Box>
                     <UserAvatar
                       uid={ownerInfo.uid}
@@ -308,38 +311,48 @@ function ProductDashboard({ productId }: { productId: string }) {
                     ) : null}
                   </Stack>
                 </Inline>
-                <Box maxWidth="lg">
-                  <Button style={{ borderRadius: 100 }}>More from owner</Button>
+                <Box
+                  rounded="lg"
+                  padding="4"
+                  color={!product.isUnderReview ? 'green900' : 'yellow800'}
+                  backgroundColor={
+                    !product.isUnderReview ? 'green100' : 'yellow100'
+                  }
+                >
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {product.isUnderReview
+                      ? `This product is under review by team '${config.appTitle}. You can wait for this to be reviewed or you can just submit your request.'`
+                      : `This product is reviewed and verified by the team at '${config.appTitle}'. You can submit your request for renting it out.`}
+                  </Text>
                 </Box>
                 {status ? (
                   <Alert status="error" margin="0">
                     {status}
                   </Alert>
                 ) : null}
-                <Box maxWidth="lg">
-                  <Button
-                    level="primary"
-                    status="success"
-                    style={{ borderRadius: 100 }}
-                    onClick={onSendRequestClick}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Box>
-                          <SpinnerIcon />
-                        </Box>
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Box>
-                          <RaiseIcon />
-                        </Box>
-                        Send Rent Request
-                      </>
-                    )}
-                  </Button>
-                </Box>
+
+                <Button
+                  level="primary"
+                  status="success"
+                  style={{ borderRadius: 100 }}
+                  onClick={onSendRequestClick}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Box>
+                        <SpinnerIcon />
+                      </Box>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Box>
+                        <RaiseIcon />
+                      </Box>
+                      Send Rent Request
+                    </>
+                  )}
+                </Button>
               </Stack>
             </form>
           </Box>
