@@ -22,6 +22,8 @@ import YourProducts from './pages/YourProducts';
 import ProductsPage from './pages/ProductPage';
 import { LoginPage, SignUpPage } from './pages/Auth/index';
 import { getDatabase } from 'firebase/database';
+import RequestsPage from './pages/RequestsPage';
+import RequestsByYouPage from './pages/RequestsByYou';
 
 function App() {
   const app = useFirebaseApp();
@@ -54,6 +56,12 @@ function App() {
                     <Route path="add-product" element={<AddProduct />} />
                   </Route>
                   <Route path="" element={<Profile />} />
+                  <Route path="requests" element={<RequestsPage />}>
+                    <Route
+                      path="requests-by-you"
+                      element={<RequestsByYouPage />}
+                    />
+                  </Route>
                 </Route>
                 <Route path="" element={<Home />} />
               </Route>

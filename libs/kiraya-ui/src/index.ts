@@ -1,5 +1,6 @@
 export * from './lib/Box';
 export * from './lib/Form';
+export * from './lib/Link';
 export * from './lib/Menu';
 export * from './lib/Text';
 export * from './lib/Time';
