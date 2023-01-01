@@ -42,6 +42,7 @@ export function AppLayout() {
 export function Header() {
   const logout = useLogout();
   const { user } = useProfile();
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,6 +56,11 @@ export function Header() {
   function onBlurredInput() {
     setSearchInFocus(false);
     inputContainerRef.current?.classList.replace('w-[40%]', 'w-[20%]');
+  }
+  function onSearchClicked() {
+    console.log('Console:');
+    navigate(`/search?query=${inputRef.current?.value}`);
+    return;
   }
   return (
     <Inline
@@ -99,13 +105,22 @@ export function Header() {
             type="search"
             name="q"
             ref={inputRef}
+            tabIndex={0}
             onFocus={onInputFocus}
             onBlur={onBlurredInput}
+            onKeyDown={(e) => {
+              const keyCode = e.key as string;
+              if (keyCode === 'Enter') {
+                onSearchClicked();
+                return;
+              }
+            }}
             placeholder="Search here..."
             className="h-full w-full border-[2px] bg-white text-md rounded-[50px] px-4 outline-0"
           />
           <button
             type="button"
+            onClick={onSearchClicked}
             className="text-white rounded-full h-8 w-8 bg-blue-900 absolute top-[50%] right-[5px] translate-y-[-50%]"
           >
             <Box>

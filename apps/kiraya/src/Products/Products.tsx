@@ -1,4 +1,8 @@
-import { Product, useDeleteProduct } from '@kiraya/data-store/products';
+import {
+  Product,
+  ProductCategory,
+  useDeleteProduct,
+} from '@kiraya/data-store/products';
 import {
   Alert,
   Box,
@@ -11,17 +15,20 @@ import {
   Modal,
   ModalBody,
   ModalFooter,
+  SkeletonDescription,
+  SkeletonImage,
+  SkeletonTitle,
   Stack,
   Text,
   useOverlayTriggerState,
 } from '@kiraya/kiraya-ui';
-// import Slider from 'react-slick';
-import React from 'react';
+import React, { useState } from 'react';
 import { Categories } from './data';
 import { iconsForCategories } from './index';
 import { Form, Formik } from 'formik';
 import { useProfile } from '@kiraya/data-store/users';
 import { toast } from 'react-hot-toast';
+import { getColorForString } from 'generate-colors';
 
 export function ProductCard({
   product,
@@ -30,17 +37,29 @@ export function ProductCard({
   product: Product;
   onProductClick: (productId: string) => void;
 }) {
-  const { productMedia } = product;
+  const {
+    uid,
+    title,
+    category,
+    productMedia,
+    description,
+    duration,
+    address,
+    pricePerMonth,
+  } = product;
+  const [imageLoading, setImageLoading] = useState<boolean>(true);
+
   return (
     <Box
-      cursor="pointer"
-      className="rounded-lg"
       borderWidth="1"
-      onClick={() => onProductClick(product.uid)}
+      rounded="md"
+      cursor="pointer"
+      onClick={() => onProductClick(uid)}
+      className="w-[340px] min-w-[340px] hover:shadow-2xl hover:rounded-lg"
     >
-      <Stack gap="2">
+      <Box className="w-full h-60" position="relative">
         {productMedia?.length ? (
-          <Box className="w-full h-56 relative">
+          <>
             {product.isUnderReview ? (
               <Box
                 position="absolute"
@@ -68,87 +87,162 @@ export function ProductCard({
                 </Text>
               </Box>
             )}
+            {imageLoading ? <SkeletonImage /> : null}
             <img
-              className="rounded-t-lg w-full h-56 object-cover"
               src={productMedia[0]}
-              alt={product.title}
+              alt={title}
+              className={`${
+                imageLoading ? 'hidden' : 'block'
+              } w-full h-60 object-contain`}
+              onLoad={() => setImageLoading(false)}
             />
-          </Box>
-        ) : null}
-        <Stack gap="2" paddingX="2">
-          <Inline alignItems="center">
+          </>
+        ) : (
+          <Text>No Media Available</Text>
+        )}
+      </Box>
+      <Stack width="full" padding="3" gap="2">
+        {imageLoading ? (
+          <SkeletonTitle />
+        ) : (
+          <Inline alignItems="center" gap="1">
             {iconsForCategories({
-              id: product.category.id as Categories,
+              id: category.id as Categories,
               size: '4',
               color: 'gray500',
             })}
             <Text fontSize="sm" color="gray500" fontWeight="semibold">
-              {product.category.label}
+              {category.label}
             </Text>
           </Inline>
-          <Stack gap="1">
-            <Box className="h-10">
-              <Text
-                className="line-clamp-2"
-                fontSize="md"
-                fontWeight="semibold"
-              >
-                {product.title}
-              </Text>
-            </Box>
+        )}
+
+        <Box height="12">
+          {imageLoading ? (
+            <SkeletonTitle />
+          ) : (
+            <Text className="line-clamp-2" fontWeight="semibold">
+              {title}
+            </Text>
+          )}
+        </Box>
+        <Box height="8">
+          {imageLoading ? (
+            <SkeletonDescription />
+          ) : (
             <Text
               fontSize="sm"
               className="break-all line-clamp-2"
-              color={product.description?.length ? undefined : 'gray500'}
+              color={description?.length ? undefined : 'gray500'}
             >
-              {product.description ||
-                'There is no description to this product.'}
+              {description || 'There is no description to this product.'}
             </Text>
+          )}
+        </Box>
+        <Inline alignItems="center" justifyContent="between">
+          <Stack gap="1">
+            {imageLoading ? (
+              <>
+                <SkeletonTitle />
+                <SkeletonDescription />
+              </>
+            ) : (
+              <>
+                <Text fontSize="base" fontWeight="semibold">
+                  Available for?
+                </Text>
+                <Inline gap="1" alignItems="end">
+                  <Text fontSize="base">
+                    {Math.min(...duration) === Math.max(...duration)
+                      ? Math.max(...duration)
+                      : `${Math.min(...duration)} - ${Math.max(...duration)}`}
+                  </Text>
+                  <Text color="gray500" fontSize="sm" fontWeight="semibold">
+                    Months
+                  </Text>
+                </Inline>
+              </>
+            )}
           </Stack>
-          <Inline alignItems="center" justifyContent="between">
-            <Stack gap="1">
-              <Text fontSize="base" fontWeight="semibold">
-                Available for?
-              </Text>
-              <Inline gap="1" alignItems="end">
-                <Text fontSize="base">
-                  {Math.min(...product.duration) ===
-                  Math.max(...product.duration)
-                    ? Math.max(...product.duration)
-                    : `${Math.min(...product.duration)} - ${Math.max(
-                        ...product.duration
-                      )}`}
-                </Text>
-                <Text color="gray500" fontSize="sm" fontWeight="semibold">
-                  Months
-                </Text>
-              </Inline>
+          {address ? (
+            <Stack gap="1" textAlign="right">
+              {imageLoading ? null : (
+                <>
+                  <Box>
+                    <LocationIcon size="5" color="red500" />
+                  </Box>
+                  <Text fontSize="sm" fontWeight="medium">
+                    {address.state.label}
+                  </Text>
+                </>
+              )}
             </Stack>
-            {product.address ? (
-              <Stack gap="1" textAlign="right">
-                <Box>
-                  <LocationIcon size="5" color="red500" />
-                </Box>
-                <Text fontSize="sm" fontWeight="medium">
-                  {product.address.state.label}
-                </Text>
-              </Stack>
-            ) : null}
-          </Inline>
-          <Box className="h-[2px]" backgroundColor="gray100" />
-          <Inline
-            alignItems="center"
-            justifyContent="between"
-            paddingBottom="3"
-          >
+          ) : null}
+        </Inline>
+        <Box borderTopWidth="1" paddingTop="3">
+          <Inline alignItems="center" justifyContent="between">
             <Text fontWeight="semibold" fontSize="base" color="blue900">
-              Per Month
+              Price
             </Text>
-            <Text fontWeight="medium">₹ {product.pricePerMonth}</Text>
+            {imageLoading ? (
+              <SkeletonTitle />
+            ) : (
+              <Text fontWeight="medium">₹ {pricePerMonth}/m</Text>
+            )}
           </Inline>
-        </Stack>
+        </Box>
       </Stack>
     </Box>
+  );
+}
+
+export function CategoryCard({
+  category,
+  onCategoryClick,
+}: {
+  category: ProductCategory;
+  onCategoryClick: (category: ProductCategory) => void;
+}) {
+  const { id, label } = category;
+  const [r, g, b] = getColorForString(id);
+  return (
+    <Stack
+      rounded="lg"
+      cursor="pointer"
+      alignItems="center"
+      gap="4"
+      justifyContent="center"
+      className="w-44 h-44 hover:shadow-2xl hover:rounded-lg"
+      padding="3"
+      style={{
+        backgroundColor: `rgba(${r}, ${g}, ${b}, .5)`,
+      }}
+      borderWidth="1"
+      onClick={() => onCategoryClick(category)}
+    >
+      <Stack
+        height="12"
+        width="12"
+        rounded="full"
+        alignItems="center"
+        justifyContent="center"
+        style={{
+          color: `rgb(${r}, ${g}, ${b})`,
+          background: `white`,
+        }}
+      >
+        {iconsForCategories({
+          id: category.id as Categories,
+          size: '6',
+          color: 'blue900',
+        })}
+      </Stack>
+      <Box textAlign="center" height="12">
+        <Text fontWeight="semibold" color="white">
+          {label}
+        </Text>
+      </Box>
+    </Stack>
   );
 }
 

@@ -15,3 +15,20 @@ export function SkeletonImage() {
     </div>
   );
 }
+
+export function SkeletonTitle() {
+  return (
+    <div role="status" className="max-w-sm animate-pulse">
+      <div className="h-2.5 bg-gray-100 rounded-full dark:bg-gray-600 w-48 mb-4"></div>
+    </div>
+  );
+}
+
+export function SkeletonDescription() {
+  return (
+    <div role="status" className="max-w-sm animate-pulse">
+      <div className="h-2 bg-gray-100 rounded-full dark:bg-gray-600 max-w-[360px] mb-2.5"></div>
+      <div className="h-2 bg-gray-100 rounded-full dark:bg-gray-600 mb-2.5"></div>
+    </div>
+  );
+}
