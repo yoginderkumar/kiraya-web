@@ -22,6 +22,7 @@ import {
 } from 'reactfire';
 import { TUser, useProfile } from '@kiraya/data-store/users';
 import { Optional } from 'utility-types';
+import { useFormik } from 'formik';
 import {
   useCreateVerificationRequest,
   useUpdateVerificationRequestWithProduct,
@@ -31,6 +32,14 @@ export type ProductCategory = {
   id: string;
   label: string;
 };
+
+export type Categories =
+  | 'books'
+  | 'musicalInstruments'
+  | 'homeAppliances'
+  | 'furniture'
+  | 'decor'
+  | 'storage';
 
 export type Product = {
   uid: string;
@@ -229,17 +238,19 @@ export function useProductsForHomeUsers() {
   const { data: user } = useUser();
   const productsQuery = query(
     productsCollection,
-    where('ownerId', '!=', user?.uid || '')
-    // orderBy('creationAt', 'desc')
+    orderBy('creationAt', 'desc')
   );
   const { data: products } = useFirestoreCollectionData(productsQuery, {
     idField: 'id',
   });
   const popularProducts = useMemo(() => {
-    return products.sort((productA, productB) => {
-      return (productA?.viewCount || 0) > (productB?.viewCount || 0) ? -1 : 1;
-    });
-  }, []);
+    return products
+      .filter((product) => product.ownerId !== user?.uid)
+      .sort((productA, productB) => {
+        return (productA?.viewCount || 0) > (productB?.viewCount || 0) ? -1 : 1;
+      })
+      .slice(0, 6);
+  }, [user?.uid]);
 
   useEffect(() => {
     if (products.length) {
@@ -342,5 +353,68 @@ export function useUpdateProduct(productId: string) {
   return {
     progress,
     update,
+  };
+}
+
+export function useProducts() {
+  const productsCollection = useProductsCollection();
+  const { data: user } = useUser();
+  const productsQuery = query(
+    productsCollection,
+    where('ownerId', '!=', user?.uid || 'missing'),
+    orderBy('ownerId'),
+    orderBy('creationAt', 'desc')
+  );
+  const { data: products } = useFirestoreCollectionData(productsQuery, {
+    idField: 'id',
+  });
+  return {
+    products,
+  };
+}
+
+type ProductSearchParams = {
+  query?: string;
+  category?: Categories;
+};
+
+export function useSearchProducts() {
+  const { products: baseProducts } = useProducts();
+  const {
+    values: params,
+    handleChange: handleParamsChange,
+    setFieldValue,
+  } = useFormik<ProductSearchParams>({
+    initialValues: { query: '' },
+    onSubmit: () => undefined,
+  });
+  const hasAppliedFilters = useMemo(() => {
+    return Boolean(params.query?.trim() || params.category);
+  }, [params]);
+  const products = useMemo(() => {
+    if (!hasAppliedFilters) return baseProducts;
+    return baseProducts.filter((p) => {
+      if (params.query?.trim()) {
+        if (
+          !p.title.toLowerCase().includes(params.query.trim().toLowerCase())
+        ) {
+          return false;
+        }
+      }
+      if (params.category) {
+        if (p.category.id !== params.category) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [baseProducts, params]);
+  return {
+    allProducts: baseProducts,
+    products,
+    params,
+    hasAppliedFilters,
+    handleParamsChange,
+    setParamValue: setFieldValue,
   };
 }

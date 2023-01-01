@@ -9,6 +9,11 @@ const categories: ProductCategory[] = [
   { id: 'storage', label: 'Storage' },
 ];
 
+export function getCategoryDetails(id: Categories) {
+  const category = categories.find((category) => category.id === id);
+  return category;
+}
+
 export type Categories =
   | 'books'
   | 'musicalInstruments'

@@ -184,7 +184,6 @@ function ProductDashboard({ productId }: { productId: string }) {
                     rounded="lg"
                     onClick={() => setActiveImage({ index, url: media })}
                   >
-                    {/* {loadingImage ?  : null} */}
                     <img
                       src={media}
                       onLoad={onLoadImage}
@@ -321,7 +320,7 @@ function ProductDashboard({ productId }: { productId: string }) {
                 >
                   <Text fontSize="sm" fontWeight="semibold">
                     {product.isUnderReview
-                      ? `This product is under review by team '${config.appTitle}. You can wait for this to be reviewed or you can just submit your request.'`
+                      ? `This product is under review by team '${config.appTitle}'. You can wait for this to be reviewed or you can just submit your request.'`
                       : `This product is reviewed and verified by the team at '${config.appTitle}'. You can submit your request for renting it out.`}
                   </Text>
                 </Box>

@@ -24,6 +24,7 @@ import { LoginPage, SignUpPage } from './pages/Auth/index';
 import { getDatabase } from 'firebase/database';
 import RequestsPage from './pages/RequestsPage';
 import RequestsByYouPage from './pages/RequestsByYou';
+import SearchPage from './pages/SearchPage';
 
 function App() {
   const app = useFirebaseApp();
@@ -42,6 +43,7 @@ function App() {
               <Route path="/" element={<AppLayout />}>
                 <Route path="/products/:productId" element={<ProductsPage />} />
                 <Route path="/home" element={<Home />} />
+                <Route path="/search" element={<SearchPage />} />
                 <Route
                   path="/profile"
                   element={
