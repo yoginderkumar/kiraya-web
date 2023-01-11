@@ -265,6 +265,16 @@ export function useProductsForHomeUsers() {
   };
 }
 
+export function useProductsForCategories(categoryId: string) {
+  const { products } = useProducts();
+  const categorizedProducts = useMemo(() => {
+    return products.filter((product) => product.category.id === categoryId);
+  }, []);
+  return {
+    categorizedProducts,
+  };
+}
+
 export function useUpdateProduct(productId: string) {
   const [progress, setProgress] = useState<number>(0);
 

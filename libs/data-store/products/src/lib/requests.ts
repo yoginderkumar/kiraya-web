@@ -8,16 +8,17 @@ import {
   where,
   getDocs,
   orderBy,
+  Timestamp,
 } from 'firebase/firestore';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback } from 'react';
 import { useFirestore, useFirestoreCollectionData, useUser } from 'reactfire';
 
 export type RentRequest = {
   uid: string;
   status: 'pending' | 'approved' | 'rejected';
   productId: string;
-  creationAt: string;
-  updatedAt: string;
+  creationAt: Timestamp;
+  updatedAt: Timestamp;
   raisedBy: {
     uid: string;
     name: string;
