@@ -2,11 +2,14 @@ import { useRequestsByYou } from '@kiraya/data-store/products';
 import {
   Box,
   DataLoadingFallback,
+  getButtonClassName,
   Heading,
   Stack,
   Text,
+  Time,
 } from '@kiraya/kiraya-ui';
-import React from 'react';
+import React, { Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
 import ErrorBoundary from '../ErrorBoundary';
 
@@ -25,6 +28,7 @@ export default function RequestsByYouPage() {
 
 function RequestsByYou() {
   const { requests } = useRequestsByYou();
+  console.log('Req: ', requests);
   return (
     <Box
       bgColor="white"
@@ -34,7 +38,7 @@ function RequestsByYou() {
     >
       <Stack maxWidth="xl" gap="6">
         <Heading as="h3" fontSize="md" fontWeight="semibold">
-          By you
+          Requests raised by you
         </Heading>
         {requests.length ? (
           <Stack gap="4">
@@ -63,11 +67,145 @@ function RequestsByYou() {
                     bgColor="gray100"
                     paddingX="3"
                     paddingY="4"
-                    className="w-[130px]"
+                    className="w-[260px]"
                   >
                     Date &amp; Time
                   </Box>
+                  <Box
+                    as="th"
+                    position="sticky"
+                    top="0"
+                    bgColor="gray100"
+                    paddingX="3"
+                    paddingY="4"
+                    className="w-[130px]"
+                  >
+                    Product Details
+                  </Box>
+                  <Box
+                    as="th"
+                    position="sticky"
+                    top="0"
+                    bgColor="gray100"
+                    paddingX="3"
+                    paddingY="4"
+                    className="w-[260px]"
+                  >
+                    Status
+                  </Box>
+                  <Box
+                    as="th"
+                    position="sticky"
+                    top="0"
+                    bgColor="gray100"
+                    paddingX="3"
+                    paddingY="4"
+                    className="w-[260px]"
+                  >
+                    Actions
+                  </Box>
                 </tr>
+              </Box>
+              <Box as="tbody">
+                {requests.map((request) => (
+                  <Fragment key={request.uid}>
+                    <Box
+                      as="tr"
+                      position="sticky"
+                      top="0"
+                      paddingX="3"
+                      paddingY="4"
+                      className="w-[130px]"
+                    >
+                      <Box
+                        as="td"
+                        paddingX="3"
+                        paddingY="4"
+                        className="whitespace-pre"
+                      >
+                        <Stack gap="2" textAlign="center">
+                          <Time
+                            fontSize="sm"
+                            color="gray500"
+                            timeStamp={request.creationAt}
+                            format="dd MMM yyyy, hh:mm a"
+                          />
+                        </Stack>
+                      </Box>
+                      <Box
+                        as="td"
+                        paddingX="3"
+                        paddingY="4"
+                        className="whitespace-pre"
+                      >
+                        <Stack gap="2" textAlign="center">
+                          <Link to={`/products/${request.productId}`}>
+                            <Text
+                              fontSize="sm"
+                              fontWeight="semibold"
+                              color="blue900"
+                            >
+                              Product Details
+                            </Text>
+                          </Link>
+                        </Stack>
+                      </Box>
+                      <Box
+                        as="td"
+                        paddingX="3"
+                        paddingY="4"
+                        className="whitespace-pre"
+                      >
+                        <Stack gap="2" textAlign="center">
+                          <Link to={`/products/${request.productId}`}>
+                            <Stack
+                              rounded="md"
+                              backgroundColor={
+                                request.status === 'pending'
+                                  ? 'yellow600'
+                                  : request.status === 'rejected'
+                                  ? 'red500'
+                                  : request.status === 'approved'
+                                  ? 'gray500'
+                                  : 'yellow300'
+                              }
+                            >
+                              <Text
+                                color="white"
+                                fontSize="sm"
+                                fontWeight="semibold"
+                                style={{
+                                  paddingTop: 4,
+                                  paddingBottom: 4,
+                                }}
+                              >
+                                {request.status}
+                              </Text>
+                            </Stack>
+                          </Link>
+                        </Stack>
+                      </Box>
+                      <Box
+                        as="td"
+                        paddingX="3"
+                        paddingY="4"
+                        className="whitespace-pre"
+                      >
+                        <Stack
+                          gap="2"
+                          textAlign="center"
+                          color="red500"
+                          cursor="pointer"
+                          className={getButtonClassName({ inline: true })}
+                        >
+                          <Text fontSize="sm" fontWeight="semibold">
+                            Cancel Request
+                          </Text>
+                        </Stack>
+                      </Box>
+                    </Box>
+                  </Fragment>
+                ))}
               </Box>
             </Box>
           </Stack>

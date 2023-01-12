@@ -109,6 +109,9 @@ export function Header() {
             onFocus={onInputFocus}
             onBlur={onBlurredInput}
             onKeyDown={(e) => {
+              if (!inputRef.current?.value) {
+                return;
+              }
               const keyCode = e.key as string;
               if (keyCode === 'Enter') {
                 onSearchClicked();

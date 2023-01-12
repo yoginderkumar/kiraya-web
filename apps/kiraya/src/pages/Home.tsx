@@ -1,5 +1,6 @@
 import {
   ProductCategory,
+  useProductsForCategories,
   useProductsForHomeUsers,
 } from '@kiraya/data-store/products';
 import {
@@ -13,12 +14,13 @@ import {
 } from '@kiraya/kiraya-ui';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { HomeBanner } from '../assets/images';
+import { HomeBanner } from '../assets/images';
 import { categories } from '../Products/data';
 import { CategoryCard, ProductCard } from '../Products/Products';
 
 export default function Home() {
   const { popularProducts } = useProductsForHomeUsers();
+  const { categorizedProducts } = useProductsForCategories('homeAppliances');
 
   const navigate = useNavigate();
 
@@ -41,15 +43,20 @@ export default function Home() {
       paddingY="4"
       backgroundColor="white"
     >
-      {/* <Box
+      <Box
         display="flex"
         alignItems="center"
         justifyContent="center"
-        className="min-h-[44%] h-[44%]"
+        overflow="hidden"
+        className="max-h-[24%] h-[24%] rounded-lg min-w-full w-full"
       >
-        <img className="h-full rounded-lg" src={HomeBanner} alt="Home Banner" />
-      </Box> */}
-      <Stack gap="3" paddingBottom="6">
+        <img
+          className="h-full overflow-hidden w-full rounded-lg"
+          src={HomeBanner}
+          alt="Home Banner"
+        />
+      </Box>
+      <Stack gap="3" paddingY="6">
         <Inline justifyContent="between" alignItems="center">
           <Heading as="h3" fontSize="lg" fontWeight="semibold">
             Rent By Popular
@@ -87,6 +94,35 @@ export default function Home() {
             />
           ))}
         </Inline>
+      </Stack>
+      <Stack gap="3" paddingBottom="6">
+        <Inline justifyContent="between" alignItems="center">
+          <Heading as="h3" fontSize="lg" fontWeight="semibold">
+            Rent By Home Appliances
+          </Heading>
+          <Button inline>
+            <Inline alignItems="center">
+              <Text fontSize="base">See All</Text>
+              <ArrowRightIcon />
+            </Inline>
+          </Button>
+        </Inline>
+        {categorizedProducts.length ? (
+          <Inline
+            as="ul"
+            alignItems="center"
+            className="overflow-x-auto"
+            gap="6"
+          >
+            {categorizedProducts.map((product) => (
+              <ProductCard
+                product={product}
+                key={product.uid}
+                onProductClick={onProductClick}
+              />
+            ))}
+          </Inline>
+        ) : null}
       </Stack>
     </Box>
   );

@@ -1,3 +1,3 @@
-import HomeBanner from './banner_one.png';
+import HomeBanner from './home_banner.jpg';
 
 export { HomeBanner };

@@ -1,6 +1,7 @@
 import {
   BookShelfIcon,
   CancelIcon,
+  DecorIcon,
   FurnitureIcon,
   HomeApplianceIcon,
   Icon,
@@ -28,6 +29,8 @@ export function iconsForCategories({ id, ...props }: CategoryIcons) {
       return <StorageIcon {...props} />;
     case 'musicalInstruments':
       return <MusicIcon {...props} />;
+    case 'decor':
+      return <DecorIcon {...props} />;
     default:
       return <CancelIcon {...props} />;
   }
