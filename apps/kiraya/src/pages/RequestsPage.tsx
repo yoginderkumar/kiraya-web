@@ -7,7 +7,7 @@ import {
   Text,
 } from '@kiraya/kiraya-ui';
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
 import ErrorBoundary from '../ErrorBoundary';
 
@@ -24,11 +24,21 @@ export default function RequestsPage() {
   );
 }
 
+export function RedirectToRequestsForYouIndexPage({
+  routePrefix = '',
+}: {
+  routePrefix?: string;
+}) {
+  return (
+    <Navigate to={`${routePrefix}/profile/requests/requests-for-you`} replace />
+  );
+}
+
 const requestOptions = [
   {
     label: 'Requests (For you)',
     description: 'View requests for your products on the platform',
-    to: 'profile',
+    to: 'requests-for-you',
   },
   {
     label: 'Requests (By you)',

@@ -22,9 +22,12 @@ import YourProducts from './pages/YourProducts';
 import ProductsPage from './pages/ProductPage';
 import { LoginPage, SignUpPage } from './pages/Auth/index';
 import { getDatabase } from 'firebase/database';
-import RequestsPage from './pages/RequestsPage';
+import RequestsPage, {
+  RedirectToRequestsForYouIndexPage,
+} from './pages/RequestsPage';
 import RequestsByYouPage from './pages/RequestsByYou';
 import SearchPage from './pages/SearchPage';
+import RequestsForYouPage from './pages/RequestsForYou';
 
 function App() {
   const app = useFirebaseApp();
@@ -60,8 +63,16 @@ function App() {
                   <Route path="" element={<Profile />} />
                   <Route path="requests" element={<RequestsPage />}>
                     <Route
+                      path="requests-for-you"
+                      element={<RequestsForYouPage />}
+                    />
+                    <Route
                       path="requests-by-you"
                       element={<RequestsByYouPage />}
+                    />
+                    <Route
+                      path=""
+                      element={<RedirectToRequestsForYouIndexPage />}
                     />
                   </Route>
                 </Route>

@@ -91,6 +91,7 @@ function ProductDashboard({ productId }: { productId: string }) {
     title,
     duration,
     address,
+    ownerId,
     pricePerMonth,
     description,
     ownerInfo,
@@ -112,6 +113,7 @@ function ProductDashboard({ productId }: { productId: string }) {
     onSubmit: formikOnSubmitWithErrorHandling(async () => {
       await sendRequest({
         productId: productId,
+        ownerId,
         raisedBy: {
           uid: user.uid,
           name: user?.displayName || 'missing',
