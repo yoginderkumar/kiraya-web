@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowDownIcon,
   Box,
@@ -192,9 +192,6 @@ export function Header() {
                   </Inline>
                 </MenuLink>
                 <MenuItemHeader className="mt-2">Settings</MenuItemHeader>
-                <MenuLink to="/profile/your-products">
-                  <ProductBoxIcon /> Your Products
-                </MenuLink>
                 <MenuItem action="logout" onClick={logout}>
                   <LogoutIcon /> Logout
                 </MenuItem>
@@ -303,6 +300,17 @@ export function ProfileSidebar({
   const navigate = useNavigate();
   const location = useLocation();
   const [state, setState] = useState<ProfileOptions>('profile');
+
+  useEffect(() => {
+    if (location.pathname.includes('your-products')) {
+      setState('products');
+    } else if (location.pathname.includes('requests')) {
+      setState('requests');
+    } else {
+      setState('profile');
+    }
+  }, [location.pathname]);
+
   return (
     <Box
       position="relative"
@@ -354,6 +362,8 @@ export function ProfileSidebar({
                 borderTopWidth={index === 0 ? '0' : '1'}
                 className="border-[#54586A]"
                 cursor="pointer"
+                backgroundColor={option.id === state ? 'blue900' : undefined}
+                rounded="md"
                 onClick={() => {
                   setState(option.id);
                   if (option.id !== state) {

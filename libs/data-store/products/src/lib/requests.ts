@@ -23,6 +23,7 @@ export type RentRequest = {
     uid: string;
     name: string;
   };
+  ownerId: string;
   reasonsForRejection?: string[];
 };
 
@@ -35,7 +36,9 @@ export function useSendRentRequest() {
   return useCallback(async function sendRequest({
     productId,
     raisedBy,
+    ownerId,
   }: {
+    ownerId: string;
     productId: string;
     raisedBy: { uid: string; name: string };
   }) {
@@ -58,6 +61,7 @@ export function useSendRentRequest() {
           creationAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           raisedBy: raisedBy,
+          ownerId,
         });
         return;
       }
@@ -75,6 +79,23 @@ export function useRequestsByYou() {
   const requestsQuery = query(
     requestsCollection,
     where('raisedBy.uid', '==', user?.uid || ''),
+    orderBy('creationAt', 'desc')
+  );
+  const { data: requests } = useFirestoreCollectionData(requestsQuery, {
+    idField: 'id',
+  });
+
+  return {
+    requests,
+  };
+}
+
+export function useRequestsForYou() {
+  const requestsCollection = useRentsRequestsCollection();
+  const { data: user } = useUser();
+  const requestsQuery = query(
+    requestsCollection,
+    where('ownerId', '==', user?.uid || ''),
     orderBy('creationAt', 'desc')
   );
   const { data: requests } = useFirestoreCollectionData(requestsQuery, {
