@@ -1,7 +1,4 @@
-import {
-  useRequestsByYou,
-  useRequestsForYou,
-} from '@kiraya/data-store/products';
+import { useRequestsForYou } from '@kiraya/data-store/products';
 import {
   Box,
   DataLoadingFallback,
@@ -16,6 +13,7 @@ import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
 import ErrorBoundary from '../ErrorBoundary';
+import { ApproveRequestInModal } from '../Requests';
 
 export default function RequestsForYouPage() {
   return (
@@ -32,7 +30,6 @@ export default function RequestsForYouPage() {
 
 function RequestsForYou() {
   const { requests } = useRequestsForYou();
-  console.log('Req: ', requests);
   return (
     <Box
       bgColor="white"
@@ -170,7 +167,7 @@ function RequestsForYou() {
                                   : request.status === 'rejected'
                                   ? 'red500'
                                   : request.status === 'approved'
-                                  ? 'gray500'
+                                  ? 'green500'
                                   : 'yellow300'
                               }
                             >
@@ -195,34 +192,60 @@ function RequestsForYou() {
                         paddingY="4"
                         className="whitespace-pre"
                       >
-                        <Inline
-                          textAlign="center"
-                          gap="4"
-                          justifyContent="center"
-                        >
-                          <Stack
-                            gap="2"
+                        {request.status === 'approved' ? (
+                          <Inline
                             textAlign="center"
-                            color="red500"
-                            cursor="pointer"
-                            className={getButtonClassName({ inline: true })}
+                            gap="4"
+                            justifyContent="center"
                           >
-                            <Text fontSize="sm" fontWeight="semibold">
-                              Reject
-                            </Text>
-                          </Stack>
-                          <Stack
-                            gap="2"
+                            <Stack
+                              gap="2"
+                              textAlign="center"
+                              cursor="pointer"
+                              className={getButtonClassName({ inline: true })}
+                            >
+                              <Text fontSize="sm" fontWeight="semibold">
+                                See User Details
+                              </Text>
+                            </Stack>
+                          </Inline>
+                        ) : (
+                          <Inline
                             textAlign="center"
-                            color="green500"
-                            cursor="pointer"
-                            className={getButtonClassName({ inline: true })}
+                            gap="4"
+                            justifyContent="center"
                           >
-                            <Text fontSize="sm" fontWeight="semibold">
-                              Approve
-                            </Text>
-                          </Stack>
-                        </Inline>
+                            <Stack
+                              gap="2"
+                              textAlign="center"
+                              color="red500"
+                              cursor="pointer"
+                              className={getButtonClassName({ inline: true })}
+                            >
+                              <Text fontSize="sm" fontWeight="semibold">
+                                Reject
+                              </Text>
+                            </Stack>
+                            <ApproveRequestInModal request={request}>
+                              {({ approve }) => (
+                                <Stack
+                                  gap="2"
+                                  textAlign="center"
+                                  color="green500"
+                                  cursor="pointer"
+                                  onClick={approve}
+                                  className={getButtonClassName({
+                                    inline: true,
+                                  })}
+                                >
+                                  <Text fontSize="sm" fontWeight="semibold">
+                                    Approve
+                                  </Text>
+                                </Stack>
+                              )}
+                            </ApproveRequestInModal>
+                          </Inline>
+                        )}
                       </Box>
                     </Box>
                   </Fragment>
