@@ -48,7 +48,7 @@ export default function Home() {
         alignItems="center"
         justifyContent="center"
         overflow="hidden"
-        className="max-h-[28%] h-[28%] rounded-lg min-w-full w-full"
+        className="max-h-[30%] h-[30%] min-w-full w-full rounded-lg"
       >
         <img
           className="h-full overflow-hidden w-full rounded-lg"

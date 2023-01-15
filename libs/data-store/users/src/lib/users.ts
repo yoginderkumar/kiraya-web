@@ -1,4 +1,4 @@
-import { updateEmail, updateProfile } from 'firebase/auth';
+import { updateProfile } from 'firebase/auth';
 import {
   collection,
   CollectionReference,
@@ -7,14 +7,8 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
-import { useCallback, useEffect } from 'react';
-import {
-  useFirestore,
-  useFirestoreDocData,
-  useUser,
-  useFunctions,
-  useSigninCheck,
-} from 'reactfire';
+import { useCallback } from 'react';
+import { useFirestore, useFirestoreDocData, useUser } from 'reactfire';
 import { Optional } from 'utility-types';
 
 export type TUser = {
@@ -119,4 +113,12 @@ export function useProfile() {
     user,
     update,
   };
+}
+
+export function useGetUser(userId: string) {
+  const userDocRef = useUserDocument(userId);
+  return useCallback(async () => {
+    const user = (await getDoc(userDocRef)).data();
+    return user;
+  }, []);
 }

@@ -28,7 +28,6 @@ export default function RequestsByYouPage() {
 
 function RequestsByYou() {
   const { requests } = useRequestsByYou();
-  console.log('Req: ', requests);
   return (
     <Box
       bgColor="white"

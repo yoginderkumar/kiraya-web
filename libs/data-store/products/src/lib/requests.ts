@@ -9,9 +9,16 @@ import {
   getDocs,
   orderBy,
   Timestamp,
+  doc,
+  updateDoc,
 } from 'firebase/firestore';
 import { useCallback } from 'react';
-import { useFirestore, useFirestoreCollectionData, useUser } from 'reactfire';
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useFirestoreDocData,
+  useUser,
+} from 'reactfire';
 
 export type RentRequest = {
   uid: string;
@@ -31,6 +38,22 @@ function useRentsRequestsCollection() {
   const store = useFirestore();
   return collection(store, 'Requests') as CollectionReference<RentRequest>;
 }
+
+function useRequestDocument(reqId: string) {
+  const usersCollection = useRentsRequestsCollection();
+  return doc(usersCollection, reqId);
+}
+
+export function useRequest(reqId: string) {
+  const reqDoc = useRequestDocument(reqId);
+  const { data: request } = useFirestoreDocData(reqDoc, {
+    idField: 'id',
+  });
+  return {
+    request,
+  };
+}
+
 export function useSendRentRequest() {
   const rentRequestsRef = useRentsRequestsCollection();
   return useCallback(async function sendRequest({
@@ -104,5 +127,22 @@ export function useRequestsForYou() {
 
   return {
     requests,
+  };
+}
+
+export function useApproveRequest(reqId: string) {
+  const reqDoc = useRequestDocument(reqId);
+  return async function approve() {
+    await updateDoc(reqDoc, { status: 'approved' });
+  };
+}
+
+export function useRejectRequest(reqId: string) {
+  const reqDoc = useRequestDocument(reqId);
+  return async function reject(data: { reasons: string[] }) {
+    await updateDoc(reqDoc, {
+      status: 'rejected',
+      reasonsForRejection: data.reasons,
+    });
   };
 }

@@ -43,7 +43,6 @@ export function AuthenticationInModal({
     setStep('login');
     state.close();
   }
-  console.log('Hey:', state);
   return (
     <>
       {children({
@@ -242,7 +241,6 @@ function SignupForm({
             onUserCompleteProfile();
             return;
           }
-          console.log('Hey: ', user);
         } catch (e) {
           const err = e as Error;
           throw new Error(err.message);

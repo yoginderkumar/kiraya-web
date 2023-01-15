@@ -159,7 +159,7 @@ export function UserAvatar({
       style={{
         color: `rgb(${r}, ${g}, ${b})`,
         background: `rgba(${r}, ${g}, ${b}, .1)`,
-        borderRadius: 100,
+        borderRadius: 500,
       }}
     >
       {photoUrl?.length ? (
