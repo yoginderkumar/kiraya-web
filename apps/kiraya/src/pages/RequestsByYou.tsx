@@ -12,6 +12,7 @@ import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
 import ErrorBoundary from '../ErrorBoundary';
+import { CancelRequestInModal } from '../Requests';
 
 export default function RequestsByYouPage() {
   return (
@@ -165,7 +166,7 @@ function RequestsByYou() {
                                   : request.status === 'rejected'
                                   ? 'red500'
                                   : request.status === 'approved'
-                                  ? 'gray500'
+                                  ? 'green500'
                                   : 'yellow300'
                               }
                             >
@@ -190,17 +191,22 @@ function RequestsByYou() {
                         paddingY="4"
                         className="whitespace-pre"
                       >
-                        <Stack
-                          gap="2"
-                          textAlign="center"
-                          color="red500"
-                          cursor="pointer"
-                          className={getButtonClassName({ inline: true })}
-                        >
-                          <Text fontSize="sm" fontWeight="semibold">
-                            Cancel Request
-                          </Text>
-                        </Stack>
+                        <CancelRequestInModal request={request}>
+                          {({ cancel }) => (
+                            <Stack
+                              gap="2"
+                              textAlign="center"
+                              color="red500"
+                              cursor="pointer"
+                              onClick={cancel}
+                              className={getButtonClassName({ inline: true })}
+                            >
+                              <Text fontSize="sm" fontWeight="semibold">
+                                Cancel Request
+                              </Text>
+                            </Stack>
+                          )}
+                        </CancelRequestInModal>
                       </Box>
                     </Box>
                   </Fragment>
@@ -208,7 +214,13 @@ function RequestsByYou() {
               </Box>
             </Box>
           </Stack>
-        ) : null}
+        ) : (
+          <Stack>
+            <Text fontSize="base" fontWeight="semibold">
+              There are no requests that you made for any product.
+            </Text>
+          </Stack>
+        )}
       </Stack>
     </Box>
   );

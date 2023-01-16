@@ -27,6 +27,8 @@ import { AuthenticationInModal } from './Auth';
 import { useProfile } from '@kiraya/data-store/users';
 import config from './config';
 import { useLogout } from '@kiraya/data-store/auth';
+import { Categories, categories, getCategoryDetails } from './Products/data';
+import { iconsForCategories } from './Products';
 
 export function AppLayout() {
   return (
@@ -45,6 +47,9 @@ export function Header() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedCat, setSelectedCat] = useState<Categories | undefined>(
+    undefined
+  );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSearchInFocus, setSearchInFocus] = useState<boolean>(false);
   function onInputFocus() {
@@ -58,7 +63,6 @@ export function Header() {
     inputContainerRef.current?.classList.replace('w-[40%]', 'w-[20%]');
   }
   function onSearchClicked() {
-    console.log('Console:');
     navigate(`/search?query=${inputRef.current?.value}`);
     return;
   }
@@ -80,21 +84,60 @@ export function Header() {
         </Link>
       </Inline>
       <Inline width="full" justifyContent="end" alignItems="center" gap="8">
-        <Button
-          level="primary"
-          style={{
-            borderRadius: '100px',
-            backgroundColor: '#EEEEEE',
-            borderColor: '#EEEEEE',
-          }}
-        >
-          <Text fontWeight="semibold" fontSize="sm" color="gray500">
-            Categories
-          </Text>
-          <Box>
-            <ArrowDownIcon size="5" color="gray500" />
-          </Box>
-        </Button>
+        <Menu>
+          <MenuButton inline>
+            <Button
+              level="primary"
+              style={{
+                borderRadius: '100px',
+                backgroundColor: '#EEEEEE',
+                borderColor: '#EEEEEE',
+              }}
+            >
+              {selectedCat ? (
+                <Box marginBottom="1">
+                  {iconsForCategories({
+                    id: selectedCat,
+                    size: '4',
+                    color: 'gray500',
+                  })}
+                </Box>
+              ) : null}
+              <Text fontWeight="semibold" fontSize="sm" color="gray500">
+                {selectedCat
+                  ? getCategoryDetails(selectedCat)?.label
+                  : 'Categories'}
+              </Text>
+              <Box>
+                <ArrowDownIcon size="5" color="gray500" />
+              </Box>
+            </Button>
+          </MenuButton>
+          <MenuList align="bottom-right">
+            {categories.map(({ id, label }) => (
+              <MenuItem
+                action="category"
+                key={id}
+                className="w-60"
+                onClick={() => {
+                  setSelectedCat(id as Categories);
+                  navigate(`/search?category=${id}`);
+                }}
+              >
+                <Inline alignItems="center" gap="2">
+                  <Box>
+                    {iconsForCategories({
+                      id: id as Categories,
+                      size: '4',
+                      color: 'gray500',
+                    })}
+                  </Box>
+                  <Text>{label}</Text>
+                </Inline>
+              </MenuItem>
+            ))}
+          </MenuList>
+        </Menu>
         <Box
           position="relative"
           height="10"
@@ -352,52 +395,52 @@ export function ProfileSidebar({
         </Box>
       </Box>
 
-      <Box position="relative" zIndex="0" paddingX="3">
-        <Stack as="ol" paddingTop="2">
+      <Box position="relative" zIndex="0">
+        <Stack as="ol">
           {profileOptions.map((option, index) => {
             return (
               <Box
-                as="li"
+                width="full"
                 key={option.id}
-                borderTopWidth={index === 0 ? '0' : '1'}
-                className="border-[#54586A]"
-                cursor="pointer"
                 backgroundColor={option.id === state ? 'blue900' : undefined}
-                rounded="md"
-                onClick={() => {
-                  setState(option.id);
-                  if (option.id !== state) {
-                  }
-                  navigate(option.id === 'profile' ? '/profile' : option.to);
-                }}
               >
-                <Stack gap="2" paddingY="2">
-                  <Inline
-                    gap="4"
-                    paddingX="3"
-                    paddingY="4"
-                    rounded="md"
-                    alignItems="center"
-                    bgColor={
-                      location.pathname.split('/')[0].includes(option.to)
-                        ? 'blue900'
-                        : 'transparent'
+                <Box
+                  as="li"
+                  key={option.id}
+                  borderTopWidth={index === 0 ? '0' : '1'}
+                  className="border-[#54586A]"
+                  cursor="pointer"
+                  rounded="md"
+                  onClick={() => {
+                    setState(option.id);
+                    if (option.id !== state) {
                     }
-                  >
-                    {option.icon ? <Box>{option.icon}</Box> : null}
-                    <Stack flex="1" minWidth="0" gap="1">
-                      <Inline gap="2" alignItems="center">
-                        <Heading
-                          as="h5"
-                          fontWeight="semibold"
-                          className="break-words"
-                        >
-                          {option.label}
-                        </Heading>
-                      </Inline>
-                    </Stack>
-                  </Inline>
-                </Stack>
+                    navigate(option.id === 'profile' ? '/profile' : option.to);
+                  }}
+                >
+                  <Stack gap="2" paddingY="2">
+                    <Inline
+                      gap="4"
+                      paddingX="3"
+                      paddingY="4"
+                      rounded="md"
+                      alignItems="center"
+                    >
+                      {option.icon ? <Box>{option.icon}</Box> : null}
+                      <Stack flex="1" minWidth="0" gap="1">
+                        <Inline gap="2" alignItems="center">
+                          <Heading
+                            as="h5"
+                            fontWeight="semibold"
+                            className="break-words"
+                          >
+                            {option.label}
+                          </Heading>
+                        </Inline>
+                      </Stack>
+                    </Inline>
+                  </Stack>
+                </Box>
               </Box>
             );
           })}

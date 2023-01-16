@@ -13,7 +13,7 @@ import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
 import ErrorBoundary from '../ErrorBoundary';
-import { ApproveRequestInModal } from '../Requests';
+import { ApproveRequestInModal, RejectRequestInModal } from '../Requests';
 
 export default function RequestsForYouPage() {
   return (
@@ -30,6 +30,7 @@ export default function RequestsForYouPage() {
 
 function RequestsForYou() {
   const { requests } = useRequestsForYou();
+
   return (
     <Box
       bgColor="white"
@@ -209,7 +210,7 @@ function RequestsForYou() {
                               </Text>
                             </Stack>
                           </Inline>
-                        ) : (
+                        ) : request.status === 'rejected' ? (
                           <Inline
                             textAlign="center"
                             gap="4"
@@ -218,14 +219,38 @@ function RequestsForYou() {
                             <Stack
                               gap="2"
                               textAlign="center"
-                              color="red500"
                               cursor="pointer"
                               className={getButtonClassName({ inline: true })}
                             >
                               <Text fontSize="sm" fontWeight="semibold">
-                                Reject
+                                --
                               </Text>
                             </Stack>
+                          </Inline>
+                        ) : (
+                          <Inline
+                            textAlign="center"
+                            gap="4"
+                            justifyContent="center"
+                          >
+                            <RejectRequestInModal request={request}>
+                              {({ reject }) => (
+                                <Stack
+                                  gap="2"
+                                  textAlign="center"
+                                  color="red500"
+                                  cursor="pointer"
+                                  onClick={reject}
+                                  className={getButtonClassName({
+                                    inline: true,
+                                  })}
+                                >
+                                  <Text fontSize="sm" fontWeight="semibold">
+                                    Reject
+                                  </Text>
+                                </Stack>
+                              )}
+                            </RejectRequestInModal>
                             <ApproveRequestInModal request={request}>
                               {({ approve }) => (
                                 <Stack
@@ -253,7 +278,14 @@ function RequestsForYou() {
               </Box>
             </Box>
           </Stack>
-        ) : null}
+        ) : (
+          <Stack>
+            <Text fontSize="base" fontWeight="semibold">
+              There are no requests present for any of your products out their.
+              Try changing description or add relevant tags.
+            </Text>
+          </Stack>
+        )}
       </Stack>
     </Box>
   );

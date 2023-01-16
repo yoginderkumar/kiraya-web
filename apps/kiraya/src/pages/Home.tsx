@@ -15,6 +15,7 @@ import {
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HomeBanner } from '../assets/images';
+import { whyYouShouldRent } from '../constants/address';
 import { categories } from '../Products/data';
 import { CategoryCard, ProductCard } from '../Products/Products';
 
@@ -61,7 +62,7 @@ export default function Home() {
           <Heading as="h3" fontSize="lg" fontWeight="semibold">
             Rent By Popular
           </Heading>
-          <Button inline>
+          <Button inline onClick={() => navigate(`/search?type=popular`)}>
             <Inline alignItems="center">
               <Text fontSize="base">See All</Text>
               <ArrowRightIcon />
@@ -100,7 +101,10 @@ export default function Home() {
           <Heading as="h3" fontSize="lg" fontWeight="semibold">
             Rent By Home Appliances
           </Heading>
-          <Button inline>
+          <Button
+            inline
+            onClick={() => navigate(`/search?category=homeAppliances`)}
+          >
             <Inline alignItems="center">
               <Text fontSize="base">See All</Text>
               <ArrowRightIcon />
@@ -120,6 +124,47 @@ export default function Home() {
                 key={product.uid}
                 onProductClick={onProductClick}
               />
+            ))}
+          </Inline>
+        ) : null}
+      </Stack>
+      <Stack gap="3" paddingY="6">
+        <Inline justifyContent="center" paddingBottom="3" alignItems="center">
+          <Heading
+            as="h3"
+            fontSize="lg"
+            fontWeight="semibold"
+            className="text-center"
+          >
+            Why You Should Rent?
+          </Heading>
+        </Inline>
+        {whyYouShouldRent.length ? (
+          <Inline
+            as="ul"
+            justifyContent="between"
+            alignItems="center"
+            className="overflow-x-auto"
+          >
+            {whyYouShouldRent.map((reason) => (
+              <Stack
+                key={reason.id}
+                textAlign="center"
+                borderRadius="md"
+                borderWidth="1"
+                width="full"
+                marginX="4"
+                padding="6"
+                gap="4"
+                justifyContent="center"
+              >
+                <Text fontSize="md" fontWeight="semibold">
+                  {reason.title}
+                </Text>
+                <Text fontSize="sm" className="px-4">
+                  {reason.text}
+                </Text>
+              </Stack>
             ))}
           </Inline>
         ) : null}

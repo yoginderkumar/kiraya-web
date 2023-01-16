@@ -10,6 +10,7 @@ import {
   orderBy,
   deleteDoc,
   writeBatch,
+  updateDoc,
 } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -97,10 +98,16 @@ export function useEnsuredProduct(productId: string) {
 }
 
 export function useProduct(productId: string) {
+  const productDoc = useProductDocument(productId);
   const { product, isDeleted } = useEnsuredProduct(productId);
+  const incrementProductViewCount = useCallback(() => {
+    updateDoc(productDoc, { viewCount: (product.viewCount || 0) + 1 });
+  }, []);
   return {
     product,
     isDeleted,
+
+    incrementProductViewCount,
   };
 }
 
@@ -386,6 +393,7 @@ export function useProducts() {
 type ProductSearchParams = {
   query?: string;
   category?: Categories;
+  type?: 'popular';
 };
 
 export function useSearchProducts() {
@@ -399,11 +407,11 @@ export function useSearchProducts() {
     onSubmit: () => undefined,
   });
   const hasAppliedFilters = useMemo(() => {
-    return Boolean(params.query?.trim() || params.category);
+    return Boolean(params.query?.trim() || params.category || params.type);
   }, [params]);
   const products = useMemo(() => {
     if (!hasAppliedFilters) return baseProducts;
-    return baseProducts.filter((p) => {
+    let filteredProducts = baseProducts.filter((p) => {
       if (params.query?.trim()) {
         if (
           !p.title.toLowerCase().includes(params.query.trim().toLowerCase())
@@ -418,6 +426,15 @@ export function useSearchProducts() {
       }
       return true;
     });
+    if (params.type) {
+      if (params.type === 'popular') {
+        console.log('Called: ', params.type);
+        filteredProducts = filteredProducts.sort(
+          (a, b) => (a.viewCount || 0) - (b.viewCount || 0)
+        );
+      }
+    }
+    return filteredProducts;
   }, [baseProducts, params]);
   return {
     allProducts: baseProducts,
