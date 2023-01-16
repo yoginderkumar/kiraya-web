@@ -443,7 +443,7 @@ function EditProductForm({ product }: { product: Product }) {
                     size="lg"
                     status="success"
                     title="Preview Your Product"
-                    onClick={() => resetForm()}
+                    onClick={() => navigate(`/products/${product.uid}`)}
                   >
                     <Box>
                       <PreviewProductIcon />

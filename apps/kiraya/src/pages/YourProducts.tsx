@@ -7,6 +7,7 @@ import {
   Button,
   Heading,
   getButtonClassName,
+  PlusIcon,
 } from '@kiraya/kiraya-ui';
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,32 +17,38 @@ export default function YourProducts() {
   const navigate = useNavigate();
   const { products } = useProductsForOwner();
   return (
-    <Stack width="full" gap="16" backgroundColor="white">
-      <Stack maxWidth="full" gap="8" marginY="6">
+    <Stack width="full" gap="4" backgroundColor="white">
+      <Box
+        as="header"
+        paddingY="6"
+        paddingX="8"
+        borderBottomWidth="1"
+        borderColor="gray100"
+      >
+        <Inline alignItems="center">
+          <Stack flexGrow="1" gap="1">
+            <Heading as="h2" fontSize="lg" fontWeight="semibold">
+              Your Products{' '}
+            </Heading>
+            <Heading fontSize="sm" fontWeight="medium" color="gray500">
+              <Link to="/profile">Profile</Link> | Your Products
+            </Heading>
+          </Stack>
+          <Link
+            to="add-product"
+            className={getButtonClassName({ level: 'primary' })}
+          >
+            <Box>
+              <PlusIcon />
+            </Box>
+            Add New
+          </Link>
+        </Inline>
+      </Box>
+      <Stack maxWidth="full" gap="8">
         <Stack maxWidth="full" gap="2">
           <Box paddingX="6">
-            <Box paddingY="4">
-              <Heading fontSize="sm" fontWeight="medium" color="gray500">
-                <Link to="/profile">Profile</Link> | Your Products
-              </Heading>
-            </Box>
             <Stack gap="6">
-              <Stack>
-                <Text fontSize="lg" fontWeight="semibold">
-                  Your Products
-                </Text>
-                {products.length ? (
-                  <Text>
-                    You can add your more products. By simply{' '}
-                    <Link
-                      className={getButtonClassName({ inline: true })}
-                      to="add-product"
-                    >
-                      Clicking here
-                    </Link>
-                  </Text>
-                ) : null}
-              </Stack>
               {products.length ? (
                 <Inline gap="6" as="ul" flexWrap="wrap">
                   {products.map((product) => {

@@ -23,8 +23,22 @@ export default function ProfilePage() {
   return (
     <Stack width="full" alignItems="center" gap="16">
       <Stack maxWidth="full" gap="2" width="full">
+        <Box
+          as="header"
+          paddingY="6"
+          paddingX="8"
+          borderBottomWidth="1"
+          borderColor="gray100"
+        >
+          <Stack flexGrow="1" gap="1">
+            <Heading as="h2" fontSize="lg" fontWeight="semibold">
+              Profile
+            </Heading>
+          </Stack>
+        </Box>
         <Stack
-          padding={{ xs: '0', md: '8' }}
+          paddingX={{ xs: '0', md: '8' }}
+          paddingY={{ xs: '0', md: '4' }}
           bgColor="white"
           rounded="md"
           gap="8"

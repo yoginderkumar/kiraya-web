@@ -40,6 +40,9 @@ function SearchDashboard() {
     if (searchParams.get('query')?.length) {
       renderText = searchParams.get('query') as string;
     }
+    if (searchParams.get('type')?.length) {
+      renderText = searchParams.get('type')?.toLocaleUpperCase() as string;
+    }
     return renderText;
   }, [searchParams]);
 
@@ -55,7 +58,11 @@ function SearchDashboard() {
     }
   }, [searchParams, setParamValue]);
 
-  console.log('products: ', products);
+  useEffect(() => {
+    if (searchParams.get('type')?.length) {
+      setParamValue('type', searchParams.get('type'));
+    }
+  }, [searchParams, setParamValue]);
 
   function onProductClick(prodId: string) {
     navigate(`/products/${prodId}`);

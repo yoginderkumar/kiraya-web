@@ -21,7 +21,7 @@ import {
 import { maskString } from '@kiraya/util-general';
 import { useSendRentRequest } from '@kiraya/data-store/products';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
@@ -86,7 +86,7 @@ function ProductDashboard({ productId }: { productId: string }) {
   const navigate = useNavigate();
   const sendRequest = useSendRentRequest();
   const { user } = useProfile();
-  const { product } = useProduct(productId);
+  const { product, incrementProductViewCount } = useProduct(productId);
   const {
     title,
     duration,
@@ -107,6 +107,12 @@ function ProductDashboard({ productId }: { productId: string }) {
   function onLoadImage() {
     setImageLoading(false);
   }
+
+  useEffect(() => {
+    if (user && ownerId !== user.uid) {
+      incrementProductViewCount();
+    }
+  }, [incrementProductViewCount, ownerId, user]);
 
   const { isSubmitting, submitForm, status } = useFormik({
     initialValues: {},
@@ -149,7 +155,7 @@ function ProductDashboard({ productId }: { productId: string }) {
         <Inline gap="4" justifyContent="between">
           <Stack gap="6" className="w-[30%]">
             <Box
-              rounded="md"
+              rounded="lg"
               backgroundColor="gray100"
               className="w-[425px] h-[420px] max-h-[420px]"
             >

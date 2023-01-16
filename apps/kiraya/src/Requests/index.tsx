@@ -1,12 +1,17 @@
 import {
   RentRequest,
   useApproveRequest,
+  useCancelRequest,
   useProduct,
+  useRejectRequest,
 } from '@kiraya/data-store/products';
 import { useGetUser } from '@kiraya/data-store/users';
 import {
+  Alert,
   Box,
   Button,
+  Circle,
+  formikOnSubmitWithErrorHandling,
   Inline,
   Modal,
   ModalBody,
@@ -17,6 +22,7 @@ import {
   useOverlayTriggerState,
 } from '@kiraya/kiraya-ui';
 import { maskString } from '@kiraya/util-general';
+import { Form, Formik } from 'formik';
 import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { SuspenseWithPerf } from 'reactfire';
@@ -175,6 +181,199 @@ function ApproveRequest({
           status="success"
         >
           {isSubmitting ? <SpinnerIcon color="white" /> : 'Approve'}
+        </Button>
+        <Button size="lg" disabled={isSubmitting} onClick={closeModal}>
+          Cancel
+        </Button>
+      </ModalFooter>
+    </Box>
+  );
+}
+
+export function RejectRequestInModal({
+  children,
+  ...props
+}: React.ComponentProps<typeof RejectRequest> & {
+  children: (props: { reject: () => void }) => React.ReactNode;
+}) {
+  const state = useOverlayTriggerState({});
+  return (
+    <>
+      {children({ reject: state.open })}
+      <Modal isOpen={state.isOpen} onClose={state.close} title="Are you sure?">
+        <SuspenseWithPerf
+          fallback={
+            <Box textAlign="center" paddingY="8">
+              <SpinnerIcon />
+            </Box>
+          }
+          traceId="loading_profile_to_update"
+        >
+          <RejectRequest onSuccess={state.close} {...props} />
+        </SuspenseWithPerf>
+      </Modal>
+    </>
+  );
+}
+
+const reasonsToReject = [
+  {
+    value: 'This product is not available anymore.',
+    title: 'This product is not available anymore.',
+  },
+  {
+    value: 'This product has been alloted to some other user.',
+    title: 'This product has been alloted to some other user.',
+  },
+];
+function RejectRequest({
+  request,
+  onSuccess,
+}: {
+  request: RentRequest;
+  onSuccess?: () => void;
+}) {
+  const reject = useRejectRequest(request.uid);
+  return (
+    <Formik
+      initialValues={{ reasonForRejection: reasonsToReject[0].value as string }}
+      onSubmit={formikOnSubmitWithErrorHandling(async (values) => {
+        await reject({ reasons: values.reasonForRejection });
+        toast.success('You have rejected their request successfully.');
+      })}
+    >
+      {({ values, status, isSubmitting, setFieldValue }) => (
+        <Form noValidate>
+          <ModalBody>
+            <Text fontSize="base" fontWeight="semibold">
+              Select an option
+            </Text>
+            <Text fontSize="sm" className="pt-1 pb-2">
+              Select a valid reason to reject the request
+            </Text>
+            <Stack gap="3" as="ul">
+              {reasonsToReject.map(({ value, title }) => {
+                const isSelected = value === values.reasonForRejection;
+                return (
+                  <Inline
+                    key={value}
+                    alignItems="center"
+                    gap="3"
+                    borderWidth="1"
+                    rounded="md"
+                    padding="2"
+                    cursor="pointer"
+                    backgroundColor={isSelected ? 'blue100' : undefined}
+                    onClick={() => setFieldValue('reasonForRejection', value)}
+                  >
+                    <Box>
+                      <Circle
+                        size="4"
+                        backgroundColor="white"
+                        borderColor={isSelected ? 'blue900' : 'gray400'}
+                        borderWidth={isSelected ? '4' : '2'}
+                      />
+                    </Box>
+                    <Stack>
+                      <Text fontSize="base" fontWeight="medium">
+                        {title}
+                      </Text>
+                    </Stack>
+                  </Inline>
+                );
+              })}
+            </Stack>
+            {status ? <Alert status="error">{status}</Alert> : null}
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              size="lg"
+              disabled={isSubmitting}
+              type="submit"
+              level="primary"
+              status="error"
+            >
+              {isSubmitting ? <SpinnerIcon color="white" /> : 'Reject'}
+            </Button>
+            <Button size="lg" disabled={isSubmitting} onClick={onSuccess}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </Form>
+      )}
+    </Formik>
+  );
+}
+
+export function CancelRequestInModal({
+  children,
+  ...props
+}: React.ComponentProps<typeof CancelRequest> & {
+  children: (props: { cancel: () => void }) => React.ReactNode;
+}) {
+  const state = useOverlayTriggerState({});
+  return (
+    <>
+      {children({ cancel: state.open })}
+      <Modal isOpen={state.isOpen} onClose={state.close} title="Are you sure?">
+        <SuspenseWithPerf
+          fallback={
+            <Box textAlign="center" paddingY="8">
+              <SpinnerIcon />
+            </Box>
+          }
+          traceId="loading_profile_to_update"
+        >
+          <CancelRequest closeModal={state.close} {...props} />
+        </SuspenseWithPerf>
+      </Modal>
+    </>
+  );
+}
+
+function CancelRequest({
+  request,
+  closeModal,
+}: {
+  request: RentRequest;
+  closeModal?: () => void;
+}) {
+  const cancel = useCancelRequest(request.uid);
+
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  async function cancelThisRequest() {
+    try {
+      setIsSubmitting(true);
+      await cancel();
+      setIsSubmitting(false);
+      toast.success('You have canceled your request successfully.');
+      closeModal?.();
+    } catch (e) {
+      const err = e as Error;
+      setIsSubmitting(false);
+      toast.error(err.message);
+    }
+  }
+  return (
+    <Box>
+      <ModalBody>
+        <Box backgroundColor="red100" rounded="md" padding="2">
+          <Text fontSize="base" fontWeight="semibold">
+            This action would cancel and delete the request you made for the
+            product.
+          </Text>
+        </Box>
+      </ModalBody>
+      <ModalFooter>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          onClick={cancelThisRequest}
+          size="lg"
+          status="error"
+        >
+          {isSubmitting ? <SpinnerIcon color="white" /> : 'Delete Request'}
         </Button>
         <Button size="lg" disabled={isSubmitting} onClick={closeModal}>
           Cancel

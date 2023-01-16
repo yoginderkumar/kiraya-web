@@ -11,6 +11,7 @@ import {
   Timestamp,
   doc,
   updateDoc,
+  deleteDoc,
 } from 'firebase/firestore';
 import { useCallback } from 'react';
 import {
@@ -31,7 +32,7 @@ export type RentRequest = {
     name: string;
   };
   ownerId: string;
-  reasonsForRejection?: string[];
+  reasonsForRejection?: string;
 };
 
 function useRentsRequestsCollection() {
@@ -139,10 +140,17 @@ export function useApproveRequest(reqId: string) {
 
 export function useRejectRequest(reqId: string) {
   const reqDoc = useRequestDocument(reqId);
-  return async function reject(data: { reasons: string[] }) {
+  return async function reject(data: { reasons: string }) {
     await updateDoc(reqDoc, {
       status: 'rejected',
       reasonsForRejection: data.reasons,
     });
+  };
+}
+
+export function useCancelRequest(reqId: string) {
+  const reqDoc = useRequestDocument(reqId);
+  return async function cancel() {
+    await deleteDoc(reqDoc);
   };
 }

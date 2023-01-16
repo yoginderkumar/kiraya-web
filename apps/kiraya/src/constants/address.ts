@@ -34,3 +34,21 @@ export const states: Array<{ id: string; label: string }> = [
   { id: 'delhi', label: 'Delhi' },
   { id: 'andamadAndNicobarIslands', label: 'Andaman and Nicobar Islands' },
 ];
+
+export const whyYouShouldRent = [
+  {
+    id: 'one',
+    title: 'Live Better Now',
+    text: 'With our award-winning furniture, create your dream home today. Without waiting for that elusive tomorrow.',
+  },
+  {
+    id: 'two',
+    title: 'Value For Money',
+    text: 'Bed or sofa? It’s not a choice anymore. With our pocket-friendly packages, you can have that perfect home at a fraction of the cost and effort.',
+  },
+  {
+    id: 'three',
+    title: 'Change, As Your Needs Evolve',
+    text: 'Keep things flexible and change your furniture as your needs change.',
+  },
+];
