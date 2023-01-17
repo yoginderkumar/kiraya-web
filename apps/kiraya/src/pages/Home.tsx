@@ -163,6 +163,7 @@ export default function Home() {
                 marginX="4"
                 padding="6"
                 gap="4"
+                maxWidth="sm"
                 justifyContent="center"
               >
                 <Text fontSize="md" fontWeight="semibold">
