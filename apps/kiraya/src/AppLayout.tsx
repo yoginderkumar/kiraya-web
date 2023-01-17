@@ -32,7 +32,7 @@ import { iconsForCategories } from './Products';
 
 export function AppLayout() {
   return (
-    <Stack minHeight="screen" minWidth="screenMd">
+    <Stack minHeight="screen" minWidth="full">
       <Header />
       <Inline flex="1">
         <Outlet />
@@ -68,7 +68,7 @@ export function Header() {
   }
   return (
     <Inline
-      paddingX="12"
+      paddingX={{ md: '12', xs: '4' }}
       paddingY="3"
       borderBottomWidth="2"
       backgroundColor="white"
@@ -78,204 +78,215 @@ export function Header() {
     >
       <Inline alignItems="center" gap="6">
         <Link to="/">
-          <Heading fontWeight="semibold" as="h1" fontSize="2xl" color="blue900">
+          <Heading
+            fontWeight="semibold"
+            as="h1"
+            fontSize={{ md: '2xl', xs: 'lg' }}
+            color="blue900"
+          >
             {config.appTitle.toUpperCase()}
           </Heading>
         </Link>
       </Inline>
-      <Inline width="full" justifyContent="end" alignItems="center" gap="8">
-        <Menu>
-          <MenuButton inline>
-            <Button
-              level="primary"
-              style={{
-                borderRadius: '100px',
-                backgroundColor: '#EEEEEE',
-                borderColor: '#EEEEEE',
-              }}
-            >
-              {selectedCat ? (
-                <Box marginBottom="1">
-                  {iconsForCategories({
-                    id: selectedCat,
-                    size: '4',
-                    color: 'gray500',
-                  })}
-                </Box>
-              ) : null}
-              <Text fontWeight="semibold" fontSize="sm" color="gray500">
-                {selectedCat
-                  ? getCategoryDetails(selectedCat)?.label
-                  : 'Categories'}
-              </Text>
-              <Box>
-                <ArrowDownIcon size="5" color="gray500" />
-              </Box>
-            </Button>
-          </MenuButton>
-          <MenuList align="bottom-right">
-            {categories.map(({ id, label }) => (
-              <MenuItem
-                action="category"
-                key={id}
-                className="w-60"
-                onClick={() => {
-                  setSelectedCat(id as Categories);
-                  navigate(`/search?category=${id}`);
+      <Box width="full" display={{ lg: 'block', xs: 'none' }}>
+        <Inline width="full" justifyContent="end" alignItems="center" gap="8">
+          <Menu>
+            <MenuButton inline>
+              <Button
+                level="primary"
+                style={{
+                  borderRadius: '100px',
+                  backgroundColor: '#EEEEEE',
+                  borderColor: '#EEEEEE',
                 }}
               >
-                <Inline alignItems="center" gap="2">
-                  <Box>
+                {selectedCat ? (
+                  <Box marginBottom="1">
                     {iconsForCategories({
-                      id: id as Categories,
+                      id: selectedCat,
                       size: '4',
                       color: 'gray500',
                     })}
                   </Box>
-                  <Text>{label}</Text>
-                </Inline>
-              </MenuItem>
-            ))}
-          </MenuList>
-        </Menu>
-        <Box
-          position="relative"
-          height="10"
-          ref={inputContainerRef}
-          className="w-[20%] search-box"
-        >
-          <input
-            type="search"
-            name="q"
-            ref={inputRef}
-            tabIndex={0}
-            onFocus={onInputFocus}
-            onBlur={onBlurredInput}
-            onKeyDown={(e) => {
-              if (!inputRef.current?.value) {
-                return;
-              }
-              const keyCode = e.key as string;
-              if (keyCode === 'Enter') {
-                onSearchClicked();
-                return;
-              }
-            }}
-            placeholder="Search here..."
-            className="h-full w-full border-[2px] bg-white text-md rounded-[50px] px-4 outline-0"
-          />
-          <button
-            type="button"
-            onClick={onSearchClicked}
-            className="text-white rounded-full h-8 w-8 bg-blue-900 absolute top-[50%] right-[5px] translate-y-[-50%]"
-          >
-            <Box>
-              <SearchIcon />
-            </Box>
-          </button>
-        </Box>
-        {user && user.uid ? (
-          <Menu>
-            <MenuButton inline>
-              <Circle size="8">
-                {user && user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    className="rounded-full"
-                    referrerPolicy="no-referrer"
-                    alt={user.displayName}
-                  />
-                ) : user && user.displayName ? (
-                  <Text textTransform="uppercase" fontSize="lg" color="blue900">
-                    {user.displayName ? user.displayName[0] : 'KU'}
-                  </Text>
-                ) : (
-                  <UserIcon />
-                )}
-              </Circle>
-              {user && user.uid ? <ArrowDownIcon /> : null}
+                ) : null}
+                <Text fontWeight="semibold" fontSize="sm" color="gray500">
+                  {selectedCat
+                    ? getCategoryDetails(selectedCat)?.label
+                    : 'Categories'}
+                </Text>
+                <Box>
+                  <ArrowDownIcon size="5" color="gray500" />
+                </Box>
+              </Button>
             </MenuButton>
-            {user && user.uid ? (
-              <MenuList align="bottom-right">
-                <MenuLink to={'/profile'} className="border-b py-4 mb-2">
-                  <Inline alignItems="center" gap="4" className="w-60">
-                    <Circle size="12">
-                      {user && user.photoURL ? (
-                        <img
-                          src={user.photoURL}
-                          className="rounded-full"
-                          referrerPolicy="no-referrer"
-                          alt={user.displayName}
-                        />
-                      ) : user && user.displayName ? (
-                        <Text
-                          textTransform="uppercase"
-                          fontSize="lg"
-                          color="blue900"
-                        >
-                          {user.displayName ? user.displayName[0] : 'KU'}
-                        </Text>
-                      ) : null}
-                    </Circle>
-                    <Stack gap="1">
-                      <Heading as="h4" fontWeight="medium">
-                        {user.displayName || `${config.appTitle} User`}
-                      </Heading>
-                      <Text
-                        fontSize="sm"
-                        color="gray500"
-                        className="tracking-wider"
-                      >
-                        {user.phoneNumber}
-                      </Text>
-                      <Text fontSize="xs" color="blue900" fontWeight="medium">
-                        Your Profile <ArrowDownIcon rotate="270" size="4" />
-                      </Text>
-                    </Stack>
+            <MenuList align="bottom-right">
+              {categories.map(({ id, label }) => (
+                <MenuItem
+                  action="category"
+                  key={id}
+                  className="w-60"
+                  onClick={() => {
+                    setSelectedCat(id as Categories);
+                    navigate(`/search?category=${id}`);
+                  }}
+                >
+                  <Inline alignItems="center" gap="2">
+                    <Box>
+                      {iconsForCategories({
+                        id: id as Categories,
+                        size: '4',
+                        color: 'gray500',
+                      })}
+                    </Box>
+                    <Text>{label}</Text>
                   </Inline>
-                </MenuLink>
-                <MenuItemHeader className="mt-2">Settings</MenuItemHeader>
-                <MenuItem action="logout" onClick={logout}>
-                  <LogoutIcon /> Logout
                 </MenuItem>
-                <MenuItemHeader className="py-2 px-2 text-gray-500">
-                  &copy; {config.appTitle} • Version {config.appVersion}
-                </MenuItemHeader>
-              </MenuList>
-            ) : (
-              <AuthenticationInModal>
-                {({ onOpen }) => (
-                  <MenuList align="bottom-right">
-                    <MenuItem action="login" onClick={() => onOpen('login')}>
-                      Login
-                    </MenuItem>
-                    <MenuItem action="login" onClick={() => onOpen('signup')}>
-                      Signup
-                    </MenuItem>
-                  </MenuList>
-                )}
-              </AuthenticationInModal>
-            )}
+              ))}
+            </MenuList>
           </Menu>
-        ) : (
-          <Inline gap="4" alignItems="center">
-            <Link
-              to="/login?from=home"
-              style={{ borderRadius: '100px' }}
-              className={getButtonClassName({ level: 'primary' })}
+          <Box
+            position="relative"
+            height="10"
+            ref={inputContainerRef}
+            className="w-[20%] search-box"
+          >
+            <input
+              type="search"
+              name="q"
+              ref={inputRef}
+              tabIndex={0}
+              onFocus={onInputFocus}
+              onBlur={onBlurredInput}
+              onKeyDown={(e) => {
+                if (!inputRef.current?.value) {
+                  return;
+                }
+                const keyCode = e.key as string;
+                if (keyCode === 'Enter') {
+                  onSearchClicked();
+                  return;
+                }
+              }}
+              placeholder="Search here..."
+              className="h-full w-full border-[2px] bg-white text-md rounded-[50px] px-4 outline-0"
+            />
+            <button
+              type="button"
+              onClick={onSearchClicked}
+              className="text-white rounded-full h-8 w-8 bg-blue-900 absolute top-[50%] right-[5px] translate-y-[-50%]"
             >
-              Login
-            </Link>
-            <Link
-              to="/signup?from=home"
-              style={{ borderRadius: '100px' }}
-              className={getButtonClassName({})}
-            >
-              Sign up
-            </Link>
-          </Inline>
-        )}
-      </Inline>
+              <Box>
+                <SearchIcon />
+              </Box>
+            </button>
+          </Box>
+          {user && user.uid ? (
+            <Menu>
+              <MenuButton inline>
+                <Circle size="8">
+                  {user && user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      className="rounded-full"
+                      referrerPolicy="no-referrer"
+                      alt={user.displayName}
+                    />
+                  ) : user && user.displayName ? (
+                    <Text
+                      textTransform="uppercase"
+                      fontSize="lg"
+                      color="blue900"
+                    >
+                      {user.displayName ? user.displayName[0] : 'KU'}
+                    </Text>
+                  ) : (
+                    <UserIcon />
+                  )}
+                </Circle>
+                {user && user.uid ? <ArrowDownIcon /> : null}
+              </MenuButton>
+              {user && user.uid ? (
+                <MenuList align="bottom-right">
+                  <MenuLink to={'/profile'} className="border-b py-4 mb-2">
+                    <Inline alignItems="center" gap="4" className="w-60">
+                      <Circle size="12">
+                        {user && user.photoURL ? (
+                          <img
+                            src={user.photoURL}
+                            className="rounded-full"
+                            referrerPolicy="no-referrer"
+                            alt={user.displayName}
+                          />
+                        ) : user && user.displayName ? (
+                          <Text
+                            textTransform="uppercase"
+                            fontSize="lg"
+                            color="blue900"
+                          >
+                            {user.displayName ? user.displayName[0] : 'KU'}
+                          </Text>
+                        ) : null}
+                      </Circle>
+                      <Stack gap="1">
+                        <Heading as="h4" fontWeight="medium">
+                          {user.displayName || `${config.appTitle} User`}
+                        </Heading>
+                        <Text
+                          fontSize="sm"
+                          color="gray500"
+                          className="tracking-wider"
+                        >
+                          {user.phoneNumber}
+                        </Text>
+                        <Text fontSize="xs" color="blue900" fontWeight="medium">
+                          Your Profile <ArrowDownIcon rotate="270" size="4" />
+                        </Text>
+                      </Stack>
+                    </Inline>
+                  </MenuLink>
+                  <MenuItemHeader className="mt-2">Settings</MenuItemHeader>
+                  <MenuItem action="logout" onClick={logout}>
+                    <LogoutIcon /> Logout
+                  </MenuItem>
+                  <MenuItemHeader className="py-2 px-2 text-gray-500">
+                    &copy; {config.appTitle} • Version {config.appVersion}
+                  </MenuItemHeader>
+                </MenuList>
+              ) : (
+                <AuthenticationInModal>
+                  {({ onOpen }) => (
+                    <MenuList align="bottom-right">
+                      <MenuItem action="login" onClick={() => onOpen('login')}>
+                        Login
+                      </MenuItem>
+                      <MenuItem action="login" onClick={() => onOpen('signup')}>
+                        Signup
+                      </MenuItem>
+                    </MenuList>
+                  )}
+                </AuthenticationInModal>
+              )}
+            </Menu>
+          ) : (
+            <Inline gap="4" alignItems="center">
+              <Link
+                to="/login?from=home"
+                style={{ borderRadius: '100px' }}
+                className={getButtonClassName({ level: 'primary' })}
+              >
+                Login
+              </Link>
+              <Link
+                to="/signup?from=home"
+                style={{ borderRadius: '100px' }}
+                className={getButtonClassName({})}
+              >
+                Sign up
+              </Link>
+            </Inline>
+          )}
+        </Inline>
+      </Box>
     </Inline>
   );
 }
