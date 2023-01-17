@@ -14,7 +14,7 @@ import {
 } from '@kiraya/kiraya-ui';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HomeBanner } from '../assets/images';
+import { HomeBanner, HomeBannerBottom } from '../assets/images';
 import { whyYouShouldRent } from '../constants/address';
 import { categories } from '../Products/data';
 import { CategoryCard, ProductCard } from '../Products/Products';
@@ -40,7 +40,7 @@ export default function Home() {
       maxWidth="full"
       overflowX="hidden"
       minWidth="full"
-      paddingX="12"
+      paddingX={{ md: '12', xs: '4' }}
       paddingY="4"
       backgroundColor="white"
     >
@@ -49,7 +49,7 @@ export default function Home() {
         alignItems="center"
         justifyContent="center"
         overflow="hidden"
-        className="max-h-[30%] h-[30%] min-w-full w-full rounded-lg"
+        className="min-w-full w-full rounded-lg"
       >
         <img
           className="h-full overflow-hidden w-full rounded-lg"
@@ -87,7 +87,13 @@ export default function Home() {
             Rent By Category
           </Heading>
         </Inline>
-        <Inline as="ul" alignItems="center" className="overflow-x-auto" gap="6">
+        <Inline
+          as="ul"
+          alignItems="center"
+          flexWrap="wrap"
+          className="overflow-x-auto"
+          gap="6"
+        >
           {categories.map((category) => (
             <CategoryCard
               category={category}
@@ -144,7 +150,8 @@ export default function Home() {
             as="ul"
             justifyContent="between"
             alignItems="center"
-            className="overflow-x-auto"
+            flexWrap="wrap"
+            className="overflow-x-auto gap-y-4"
           >
             {whyYouShouldRent.map((reason) => (
               <Stack
@@ -169,6 +176,19 @@ export default function Home() {
           </Inline>
         ) : null}
       </Stack>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        overflow="hidden"
+        className="min-w-full w-full rounded-lg"
+      >
+        <img
+          className="h-full overflow-hidden w-full rounded-lg"
+          src={HomeBannerBottom}
+          alt="Home Banner"
+        />
+      </Box>
     </Box>
   );
 }
