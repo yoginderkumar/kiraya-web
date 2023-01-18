@@ -9,43 +9,46 @@ import reportWebVitals from './reportWebVitals';
 import config from './config';
 import { Inline, SpinnerIcon } from '@kiraya/kiraya-ui';
 import { Toaster } from 'react-hot-toast';
+import { HelmetProvider } from 'react-helmet-async';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <FirebaseAppProvider firebaseConfig={config.firebaseConfig} suspense>
-    <Router>
-      <SuspenseWithPerf
-        traceId={'cashbook-auth-wait'}
-        fallback={
-          <Inline
-            minHeight="screen"
-            alignItems="center"
-            justifyContent="center"
-            gap="4"
-          >
-            <SpinnerIcon size="8" /> Loading...
-          </Inline>
-        }
-      >
-        <App />
-      </SuspenseWithPerf>
-      <Toaster
-        position="bottom-center"
-        reverseOrder
-        toastOptions={{
-          style: {
-            background: '#2c324b',
-            color: '#fff',
-          },
-          success: {
-            duration: 5000,
-          },
-        }}
-      />
-    </Router>
-  </FirebaseAppProvider>
+  <HelmetProvider>
+    <FirebaseAppProvider firebaseConfig={config.firebaseConfig} suspense>
+      <Router>
+        <SuspenseWithPerf
+          traceId={'cashbook-auth-wait'}
+          fallback={
+            <Inline
+              minHeight="screen"
+              alignItems="center"
+              justifyContent="center"
+              gap="4"
+            >
+              <SpinnerIcon size="8" /> Loading...
+            </Inline>
+          }
+        >
+          <App />
+        </SuspenseWithPerf>
+        <Toaster
+          position="bottom-center"
+          reverseOrder
+          toastOptions={{
+            style: {
+              background: '#2c324b',
+              color: '#fff',
+            },
+            success: {
+              duration: 5000,
+            },
+          }}
+        />
+      </Router>
+    </FirebaseAppProvider>
+  </HelmetProvider>
 );
 
 initLogging({

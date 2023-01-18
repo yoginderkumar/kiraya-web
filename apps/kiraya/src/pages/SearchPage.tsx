@@ -4,6 +4,7 @@ import {
   DataLoadingFallback,
   Heading,
   Inline,
+  PageMeta,
   Stack,
   Text,
 } from '@kiraya/kiraya-ui';
@@ -70,49 +71,54 @@ function SearchDashboard() {
   }
 
   return (
-    <Box
-      maxWidth="full"
-      overflowX="hidden"
-      minWidth="full"
-      paddingX="12"
-      paddingY="10"
-      backgroundColor="white"
-    >
-      <Stack>
-        <Heading as="h3" fontSize="lg" fontWeight="semibold">
-          Search Results For - {searchForText}
-        </Heading>
-      </Stack>
-      {products.length ? (
-        <Box paddingY="6">
-          <Inline flexWrap="wrap" gap="8">
-            {products.map((p) => (
-              <ProductCard
-                key={p.uid}
-                product={p}
-                onProductClick={onProductClick}
-              />
-            ))}
-          </Inline>
-        </Box>
-      ) : (
-        <Stack
-          flex="1"
-          gap="6"
-          alignItems="center"
-          justifyContent="center"
-          height="full"
-        >
-          <NotFoundSvg />
-          <Stack gap="2" textAlign="center">
-            <Text fontSize="md">
-              There are no products for searched keyword or category
-            </Text>
-            <Text fontSize="sm">Try something else please!</Text>
-          </Stack>
+    <>
+      <PageMeta>
+        <title>Search for {searchForText}</title>
+      </PageMeta>
+      <Box
+        maxWidth="full"
+        overflowX="hidden"
+        minWidth="full"
+        paddingX="12"
+        paddingY="10"
+        backgroundColor="white"
+      >
+        <Stack>
+          <Heading as="h3" fontSize="lg" fontWeight="semibold">
+            Search Results For - {searchForText}
+          </Heading>
         </Stack>
-      )}
-    </Box>
+        {products.length ? (
+          <Box paddingY="6">
+            <Inline flexWrap="wrap" gap="8">
+              {products.map((p) => (
+                <ProductCard
+                  key={p.uid}
+                  product={p}
+                  onProductClick={onProductClick}
+                />
+              ))}
+            </Inline>
+          </Box>
+        ) : (
+          <Stack
+            flex="1"
+            gap="6"
+            alignItems="center"
+            justifyContent="center"
+            height="full"
+          >
+            <NotFoundSvg />
+            <Stack gap="2" textAlign="center">
+              <Text fontSize="md">
+                There are no products for searched keyword or category
+              </Text>
+              <Text fontSize="sm">Try something else please!</Text>
+            </Stack>
+          </Stack>
+        )}
+      </Box>
+    </>
   );
 }
 

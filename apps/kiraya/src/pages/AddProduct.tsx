@@ -18,6 +18,7 @@ import {
   FormMediaFileField,
   ModalFooter,
   ResetIcon,
+  PageMeta,
 } from '@kiraya/kiraya-ui';
 import { Form, Formik } from 'formik';
 import React from 'react';
@@ -66,33 +67,38 @@ const addProductValidationSchema = Validator.object().shape({
 
 export default function AddProduct() {
   return (
-    <Stack width="full" gap="16" backgroundColor="white">
-      <Stack maxWidth="full" gap="8">
-        <Box
-          as="header"
-          paddingY="6"
-          paddingX="8"
-          borderBottomWidth="1"
-          borderColor="gray100"
-        >
-          <Stack flexGrow="1" gap="1">
-            <Heading as="h2" fontSize="lg" fontWeight="semibold">
-              Add Product
-            </Heading>
-            <Heading fontSize="sm" fontWeight="medium" color="gray500">
-              <Link to="/profile">Profile</Link> |{' '}
-              <Link to="/profile/your-products">Your Products</Link> | Add
-              Product
-            </Heading>
-          </Stack>
-        </Box>
-        <Stack maxWidth="full" gap="2">
-          <Box paddingX="6">
-            <AddProductForm />
+    <>
+      <PageMeta>
+        <title>Add Your Product</title>
+      </PageMeta>
+      <Stack width="full" gap="16" backgroundColor="white">
+        <Stack maxWidth="full" gap="8">
+          <Box
+            as="header"
+            paddingY="6"
+            paddingX="8"
+            borderBottomWidth="1"
+            borderColor="gray100"
+          >
+            <Stack flexGrow="1" gap="1">
+              <Heading as="h2" fontSize="lg" fontWeight="semibold">
+                Add Product
+              </Heading>
+              <Heading fontSize="sm" fontWeight="medium" color="gray500">
+                <Link to="/profile">Profile</Link> |{' '}
+                <Link to="/profile/your-products">Your Products</Link> | Add
+                Product
+              </Heading>
+            </Stack>
           </Box>
+          <Stack maxWidth="full" gap="2">
+            <Box paddingX="6">
+              <AddProductForm />
+            </Box>
+          </Stack>
         </Stack>
       </Stack>
-    </Stack>
+    </>
   );
 }
 

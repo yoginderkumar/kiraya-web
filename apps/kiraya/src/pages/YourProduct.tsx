@@ -24,6 +24,7 @@ import {
   SpinnerIcon,
   PreviewProductIcon,
   SaveIcon,
+  PageMeta,
 } from '@kiraya/kiraya-ui';
 import { Form, Formik } from 'formik';
 import React, { useMemo, useState } from 'react';
@@ -91,25 +92,30 @@ const updateProductValidationSchema = Validator.object().shape({
 export function YourProduct({ productId }: { productId: string }) {
   const { product } = useProduct(productId);
   return (
-    <Stack width="full" gap="16" backgroundColor="white">
-      <Stack maxWidth="full" gap="8" marginY="6">
-        <Stack maxWidth="full" gap="2">
-          <Box paddingX="6">
-            <Heading fontSize="sm" fontWeight="medium" color="gray500">
-              <Link to="/profile">Profile</Link> |{' '}
-              <Link to="/profile/your-products">Your Products</Link> |{' '}
-              {product.title}
-            </Heading>
-            <Stack gap="4" paddingY="4">
-              <Text fontSize="lg" fontWeight="semibold">
-                Your Product
-              </Text>
-              <EditProductForm product={product} />
-            </Stack>
-          </Box>
+    <>
+      <PageMeta>
+        <title>{product.title}</title>
+      </PageMeta>
+      <Stack width="full" gap="16" backgroundColor="white">
+        <Stack maxWidth="full" gap="8" marginY="6">
+          <Stack maxWidth="full" gap="2">
+            <Box paddingX="6">
+              <Heading fontSize="sm" fontWeight="medium" color="gray500">
+                <Link to="/profile">Profile</Link> |{' '}
+                <Link to="/profile/your-products">Your Products</Link> |{' '}
+                {product.title}
+              </Heading>
+              <Stack gap="4" paddingY="4">
+                <Text fontSize="lg" fontWeight="semibold">
+                  Your Product
+                </Text>
+                <EditProductForm product={product} />
+              </Stack>
+            </Box>
+          </Stack>
         </Stack>
       </Stack>
-    </Stack>
+    </>
   );
 }
 
@@ -393,11 +399,6 @@ function EditProductForm({ product }: { product: Product }) {
                       </Inline>
                     ))}
                   </Inline>
-                  {/* {status ? (
-                    <Alert status="error" margin="0">
-                      {status}
-                    </Alert>
-                  ) : null} */}
                 </Stack>
               </Stack>
               <Stack width="1/3">
