@@ -13,7 +13,11 @@ import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { SuspenseWithPerf } from 'reactfire';
 import ErrorBoundary from '../ErrorBoundary';
-import { ApproveRequestInModal, RejectRequestInModal } from '../Requests';
+import {
+  ApproveRequestInModal,
+  RejectRequestInModal,
+  SeeUserDetailsInModal,
+} from '../Requests';
 
 export default function RequestsForYouPage() {
   return (
@@ -199,16 +203,23 @@ function RequestsForYou() {
                             gap="4"
                             justifyContent="center"
                           >
-                            <Stack
-                              gap="2"
-                              textAlign="center"
-                              cursor="pointer"
-                              className={getButtonClassName({ inline: true })}
-                            >
-                              <Text fontSize="sm" fontWeight="semibold">
-                                See User Details
-                              </Text>
-                            </Stack>
+                            <SeeUserDetailsInModal request={request}>
+                              {({ open }) => (
+                                <Stack
+                                  gap="2"
+                                  textAlign="center"
+                                  cursor="pointer"
+                                  onClick={open}
+                                  className={getButtonClassName({
+                                    inline: true,
+                                  })}
+                                >
+                                  <Text fontSize="sm" fontWeight="semibold">
+                                    See User Details
+                                  </Text>
+                                </Stack>
+                              )}
+                            </SeeUserDetailsInModal>
                           </Inline>
                         ) : request.status === 'rejected' ? (
                           <Inline
