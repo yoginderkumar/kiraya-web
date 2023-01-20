@@ -20,8 +20,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import * as Validator from 'yup';
+import { SideBanner } from '../../assets/images';
 import { UserProfileInModal } from '../../Auth';
-import config from '../../config';
 
 export default function SignUpPage() {
   const [isNewUser, setIsNewUser] = useState<boolean>(false);
@@ -212,12 +212,12 @@ export default function SignUpPage() {
             </Formik>
           </Stack>
         </Stack>
-        <Box width="1/2" className="xs:hidden lg:block">
-          <Stack>
-            <Text color="blue900" fontSize="3xl" fontWeight="semibold">
-              {config.appTitle.toUpperCase()}
-            </Text>
-          </Stack>
+        <Box width="1/2" className="xs:hidden lg:block max-h-screen">
+          <img
+            src={SideBanner}
+            alt="side_banner"
+            className="w-full max-h-screen"
+          />
         </Box>
       </Inline>
       <UserProfileInModal defaultState={isNewUser} onSuccess={profileCreated} />

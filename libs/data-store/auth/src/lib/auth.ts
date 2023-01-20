@@ -6,6 +6,7 @@ import {
   AuthErrorCodes,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { $Values } from 'utility-types';
 import { useCheckUserExistence } from '@kiraya/data-store/users';
@@ -80,8 +81,14 @@ export function useLoginUser() {
     }
   }
 
+  async function sendResetPasswordLink(email: string) {
+    const data = await sendPasswordResetEmail(auth, email);
+    return data;
+  }
+
   return {
     loginUsingGoogle,
+    sendResetPasswordLink,
     loginUsingEmailPassword,
     registerAndLoginUserWithEmailAndPassword,
   };

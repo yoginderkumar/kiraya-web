@@ -4,6 +4,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSigninCheck } from 'reactfire';
 import LoginPage from './Login';
 import SignUpPage from './Signup';
+import ForgotPasswordPage from './ForgotPassword';
 import { queryToSearch } from '@kiraya/util-general';
 
 function UserNotLoggedIn({
@@ -41,4 +42,4 @@ function UserNotLoggedIn({
   );
 }
 
-export { LoginPage, SignUpPage, UserNotLoggedIn };
+export { LoginPage, SignUpPage, UserNotLoggedIn, ForgotPasswordPage };

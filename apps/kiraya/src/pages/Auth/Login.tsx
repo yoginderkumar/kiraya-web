@@ -18,10 +18,10 @@ import { Form, Formik } from 'formik';
 import toast from 'react-hot-toast';
 import React, { useEffect, useMemo, useState } from 'react';
 import * as Validator from 'yup';
-import config from '../../config';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useProfile } from '@kiraya/data-store/users';
 import { UserProfileInModal } from '../../Auth';
+import { SideBanner } from '../../assets/images';
 
 export default function LoginPage() {
   const { user } = useProfile();
@@ -109,14 +109,21 @@ export default function LoginPage() {
               })}
               onSubmit={formikOnSubmitWithErrorHandling(async (values) => {
                 try {
-                  await loginUsingEmailPassword(values.email, values.password);
+                  const user = await loginUsingEmailPassword(
+                    values.email,
+                    values.password
+                  );
+                  if (user) {
+                    toast.success(`Logged in as ${user.displayName}`);
+                    navigate(`/${userFrom || ''}`);
+                  }
                 } catch (e) {
                   const err = e as Error;
                   throw new Error(err.message);
                 }
               })}
             >
-              {({ status, isSubmitting }) => (
+              {({ status, values, isSubmitting }) => (
                 <Form noValidate>
                   <ModalBody>
                     <FormField
@@ -140,7 +147,13 @@ export default function LoginPage() {
                       </Alert>
                     ) : null}
                     <Text fontSize="sm">
-                      Forgot password? <Button inline>Click here</Button>
+                      Forgot password?{' '}
+                      <Link
+                        to={`/forgot-password?email=${values.email}`}
+                        className={getButtonClassName({ inline: true })}
+                      >
+                        Click here
+                      </Link>
                     </Text>
                   </ModalBody>
                   <Stack gap="4">
@@ -195,12 +208,12 @@ export default function LoginPage() {
             </Formik>
           </Stack>
         </Stack>
-        <Box width="1/2" className="xs:hidden lg:block">
-          <Stack>
-            <Text color="blue900" fontSize="3xl" fontWeight="semibold">
-              {config.appTitle.toUpperCase()}
-            </Text>
-          </Stack>
+        <Box width="1/2" className="xs:hidden lg:block max-h-screen">
+          <img
+            src={SideBanner}
+            alt="side_banner"
+            className="w-full max-h-screen"
+          />
         </Box>
       </Inline>
       <UserProfileInModal defaultState={isNewUser} onSuccess={profileCreated} />
