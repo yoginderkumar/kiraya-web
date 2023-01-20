@@ -14,11 +14,21 @@ import {
   Text,
 } from '@kiraya/kiraya-ui';
 import React from 'react';
+import Slider from 'react-slick';
 import { useNavigate } from 'react-router-dom';
-import { HomeBanner, HomeBannerBottom } from '../assets/images';
+import { HomeBanner, HomeBannerBottom, HomeBannerTwo } from '../assets/images';
 import { whyYouShouldRent } from '../constants/address';
 import { categories } from '../Products/data';
 import { CategoryCard, ProductCard } from '../Products/Products';
+
+var settings = {
+  infinite: true,
+  speed: 1000,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  autoplay: true,
+  autoplaySpeed: 2000,
+};
 
 export default function Home() {
   const { popularProducts } = useProductsForHomeUsers();
@@ -49,19 +59,34 @@ export default function Home() {
         paddingY="4"
         backgroundColor="white"
       >
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          overflow="hidden"
-          className="min-w-full w-full rounded-lg"
-        >
-          <img
-            className="h-full overflow-hidden w-full rounded-lg"
-            src={HomeBanner}
-            alt="Home Banner"
-          />
-        </Box>
+        <Slider {...settings}>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            overflow="hidden"
+            className="min-w-full w-full rounded-lg"
+          >
+            <img
+              className="h-full overflow-hidden w-full rounded-lg"
+              src={HomeBanner}
+              alt="Home Banner One"
+            />
+          </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            overflow="hidden"
+            className="min-w-full w-full rounded-lg"
+          >
+            <img
+              className="h-full overflow-hidden w-full rounded-lg"
+              src={HomeBannerTwo}
+              alt="Home Banner Two"
+            />
+          </Box>
+        </Slider>
         <Stack gap="3" paddingY="6">
           <Inline justifyContent="between" alignItems="center">
             <Heading as="h3" fontSize="lg" fontWeight="semibold">

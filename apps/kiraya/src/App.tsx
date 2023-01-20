@@ -20,7 +20,7 @@ import Profile from './pages/Profile';
 import YourProduct from './pages/YourProduct';
 import YourProducts from './pages/YourProducts';
 import ProductsPage from './pages/ProductPage';
-import { LoginPage, SignUpPage } from './pages/Auth/index';
+import { ForgotPasswordPage, LoginPage, SignUpPage } from './pages/Auth/index';
 import { getDatabase } from 'firebase/database';
 import RequestsPage, {
   RedirectToRequestsForYouIndexPage,
@@ -43,6 +43,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/" element={<AppLayout />}>
                 <Route path="/products/:productId" element={<ProductsPage />} />
                 <Route path="/home" element={<Home />} />
