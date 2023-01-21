@@ -29,6 +29,7 @@ import { Form, Formik } from 'formik';
 import { useProfile } from '@kiraya/data-store/users';
 import { toast } from 'react-hot-toast';
 import { getColorForString } from 'generate-colors';
+import { reviewStatusColorStyles } from '../Requests';
 
 export function ProductCard({
   product,
@@ -45,6 +46,7 @@ export function ProductCard({
     description,
     duration,
     address,
+    reviewStatus,
     pricePerMonth,
   } = product;
   const [imageLoading, setImageLoading] = useState<boolean>(true);
@@ -60,33 +62,27 @@ export function ProductCard({
       <Box className="w-full h-60" position="relative">
         {productMedia?.length ? (
           <>
-            {product.isUnderReview ? (
-              <Box
-                position="absolute"
-                backgroundColor="yellow100"
-                className="top-[16px]"
-                right="0"
-                roundedLeft="md"
-                paddingX="3"
-              >
-                <Text color="yellow800" fontSize="sm" fontWeight="semibold">
-                  Under Review
-                </Text>
-              </Box>
-            ) : (
-              <Box
-                position="absolute"
-                backgroundColor="green100"
-                className="top-[16px]"
-                right="0"
-                roundedLeft="md"
-                paddingX="3"
-              >
-                <Text color="green500" fontSize="sm" fontWeight="semibold">
-                  Reviewed
-                </Text>
-              </Box>
-            )}
+            <Box
+              position="absolute"
+              className="top-[16px]"
+              right="0"
+              roundedLeft="md"
+              paddingX="3"
+              color={reviewStatusColorStyles.colors[reviewStatus || 'pending']}
+              backgroundColor={
+                reviewStatusColorStyles.backgroundColors[
+                  reviewStatus || 'pending'
+                ]
+              }
+            >
+              <Text fontSize="sm" fontWeight="semibold">
+                {reviewStatus === 'rejected'
+                  ? 'Not Verified'
+                  : reviewStatus === 'approved'
+                  ? 'Verified'
+                  : 'Under Review'}
+              </Text>
+            </Box>
             {imageLoading ? <SkeletonImage /> : null}
             <img
               src={productMedia[0]}

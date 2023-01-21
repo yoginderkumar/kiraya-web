@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowDownIcon,
   Box,
-  Button,
   Circle,
   getButtonClassName,
   Heading,
@@ -14,9 +13,6 @@ import {
   MenuItemHeader,
   MenuLink,
   MenuList,
-  PlusIcon,
-  ProductBoxIcon,
-  SearchIcon,
   Stack,
   SwapArrowsIcon,
   Text,
@@ -26,14 +22,16 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useProfile } from '@kiraya/data-store/users';
 import config from './config';
 import { useLogout } from '@kiraya/data-store/auth';
-import { Categories, categories, getCategoryDetails } from './Products/data';
-import { iconsForCategories } from './Products';
 
-export function AppLayout() {
+export function DashboardLayout() {
+  const maxHeight = 'calc(100vh - 52px)';
   return (
-    <Stack minHeight="screen" minWidth="full">
+    <Stack minHeight="screen" minWidth="screenMd">
       <Header />
-      <Inline flex="1">
+      <Inline flex="1" backgroundColor="white">
+        <Box as="aside" position="relative" zIndex="10" className="w-60">
+          <Sidebar maxHeight={maxHeight} />
+        </Box>
         <Outlet />
       </Inline>
     </Stack>
@@ -43,28 +41,6 @@ export function AppLayout() {
 export function Header() {
   const logout = useLogout();
   const { user } = useProfile();
-  const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const inputContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedCat, setSelectedCat] = useState<Categories | undefined>(
-    undefined
-  );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isSearchInFocus, setSearchInFocus] = useState<boolean>(false);
-  function onInputFocus() {
-    setTimeout(() => {
-      setSearchInFocus(true);
-    }, 100);
-    inputContainerRef.current?.classList.replace('w-[20%]', 'w-[40%]');
-  }
-  function onBlurredInput() {
-    setSearchInFocus(false);
-    inputContainerRef.current?.classList.replace('w-[40%]', 'w-[20%]');
-  }
-  function onSearchClicked() {
-    navigate(`/search?query=${inputRef.current?.value}`);
-    return;
-  }
   return (
     <Inline
       paddingX={{ md: '12', xs: '4' }}
@@ -89,96 +65,6 @@ export function Header() {
       </Inline>
       <Box width="full" display={{ lg: 'block', xs: 'none' }}>
         <Inline width="full" justifyContent="end" alignItems="center" gap="8">
-          <Menu>
-            <MenuButton inline>
-              <Button
-                level="primary"
-                style={{
-                  borderRadius: '100px',
-                  backgroundColor: '#EEEEEE',
-                  borderColor: '#EEEEEE',
-                }}
-              >
-                {selectedCat ? (
-                  <Box marginBottom="1">
-                    {iconsForCategories({
-                      id: selectedCat,
-                      size: '4',
-                      color: 'gray500',
-                    })}
-                  </Box>
-                ) : null}
-                <Text fontWeight="semibold" fontSize="sm" color="gray500">
-                  {selectedCat
-                    ? getCategoryDetails(selectedCat)?.label
-                    : 'Categories'}
-                </Text>
-                <Box>
-                  <ArrowDownIcon size="5" color="gray500" />
-                </Box>
-              </Button>
-            </MenuButton>
-            <MenuList align="bottom-right">
-              {categories.map(({ id, label }) => (
-                <MenuItem
-                  action="category"
-                  key={id}
-                  className="w-60"
-                  onClick={() => {
-                    setSelectedCat(id as Categories);
-                    navigate(`/search?category=${id}`);
-                  }}
-                >
-                  <Inline alignItems="center" gap="2">
-                    <Box>
-                      {iconsForCategories({
-                        id: id as Categories,
-                        size: '4',
-                        color: 'gray500',
-                      })}
-                    </Box>
-                    <Text>{label}</Text>
-                  </Inline>
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
-          <Box
-            position="relative"
-            height="10"
-            ref={inputContainerRef}
-            className="w-[20%] search-box"
-          >
-            <input
-              type="search"
-              name="q"
-              ref={inputRef}
-              tabIndex={0}
-              onFocus={onInputFocus}
-              onBlur={onBlurredInput}
-              onKeyDown={(e) => {
-                if (!inputRef.current?.value) {
-                  return;
-                }
-                const keyCode = e.key as string;
-                if (keyCode === 'Enter') {
-                  onSearchClicked();
-                  return;
-                }
-              }}
-              placeholder="Search here..."
-              className="h-full w-full border-[2px] bg-white text-md rounded-[50px] px-4 outline-0"
-            />
-            <button
-              type="button"
-              onClick={onSearchClicked}
-              className="text-white rounded-full h-8 w-8 bg-blue-900 absolute top-[50%] right-[5px] translate-y-[-50%]"
-            >
-              <Box>
-                <SearchIcon />
-              </Box>
-            </button>
-          </Box>
           {user && user.uid ? (
             <Menu>
               <MenuButton inline>
@@ -277,36 +163,6 @@ export function Header() {
   );
 }
 
-export function DashboardLayout() {
-  const maxHeight = 'calc(100vh - 52px)';
-  return (
-    <Stack flex="1" maxWidth="screen2xl" marginX="auto" minWidth="screenMd">
-      <Inline flex="1" width="full" maxWidth="full">
-        <Box as="aside" position="relative" zIndex="10" className="w-60">
-          <ProfileSidebar maxHeight={maxHeight} />
-        </Box>
-        <Stack
-          as="main"
-          flex="1"
-          bgColor="white"
-          maxWidth="full"
-          overflow="auto"
-        >
-          <Box
-            flex="1"
-            overflow="auto"
-            style={{
-              maxHeight,
-            }}
-          >
-            <Outlet />
-          </Box>
-        </Stack>
-      </Inline>
-    </Stack>
-  );
-}
-
 type ProfileOptions = 'profile' | 'products' | 'requests';
 
 const profileOptions: Array<{
@@ -317,20 +173,14 @@ const profileOptions: Array<{
 }> = [
   { id: 'profile', label: 'Profile', icon: <UserIcon />, to: 'profile' },
   {
-    id: 'products',
-    label: 'Products',
-    icon: <ProductBoxIcon />,
-    to: 'your-products',
-  },
-  {
     id: 'requests',
-    label: 'Requests',
+    label: 'Review Requests',
     icon: <SwapArrowsIcon />,
     to: 'requests',
   },
 ];
 
-export function ProfileSidebar({
+export function Sidebar({
   maxHeight,
   routePrefix = '',
 }: {
@@ -359,39 +209,11 @@ export function ProfileSidebar({
       overflow="auto"
       minHeight="full"
       flex="1"
-      className="bg-[#2C324B]"
+      className="bg-[#2C324B] w-full max-w-max"
       style={{
         maxHeight: maxHeight,
       }}
     >
-      <Box position="sticky" top="0" zIndex="10">
-        <Box paddingX="3" paddingY="4" bgColor="gray900">
-          <Inline
-            as="button"
-            onClick={() => navigate('your-products/add-product')}
-            padding="1"
-            alignItems="center"
-            gap="4"
-            fontWeight="semibold"
-            rounded="md"
-            width="full"
-            className="bg-blue-900 bg-opacity-20"
-          >
-            <Stack
-              as="span"
-              size="8"
-              alignItems="center"
-              justifyContent="center"
-              bgColor="green900"
-              rounded="md"
-            >
-              <PlusIcon size="6" />
-            </Stack>
-            <Text as="span">Add Product</Text>
-          </Inline>
-        </Box>
-      </Box>
-
       <Box position="relative" zIndex="0">
         <Stack as="ol">
           {profileOptions.map((option, index) => {

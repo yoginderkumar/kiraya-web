@@ -27,6 +27,7 @@ import { Form, Formik } from 'formik';
 import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { SuspenseWithPerf } from 'reactfire';
+import config from '../config';
 import { UserAvatar } from '../Profile';
 
 export function ApproveRequestInModal({
@@ -552,3 +553,37 @@ export function SeeUserDetailsInModal({
     </>
   );
 }
+
+export function renderTextForProductReview(
+  status: 'pending' | 'rejected' | 'approved'
+): string {
+  switch (status) {
+    case 'pending':
+      return `This product is under review by team '${config.appTitle}'. You can wait for this to be reviewed or you can just submit your request.`;
+    case 'rejected':
+      return `This product is rejected by the team at '${config.appTitle}'. You can submit your request for renting it out but not recommended.`;
+    case 'approved':
+      return `This product is reviewed and verified by the team at '${config.appTitle}'. You can submit your request for renting it out.`;
+  }
+}
+
+type REVIEW_STATUS = 'pending' | 'rejected' | 'approved';
+export const reviewStatusColorStyles: {
+  colors: {
+    [key in REVIEW_STATUS]: React.ComponentProps<typeof Box>['color'];
+  };
+  backgroundColors: {
+    [key in REVIEW_STATUS]: React.ComponentProps<typeof Box>['backgroundColor'];
+  };
+} = {
+  colors: {
+    pending: 'yellow800',
+    rejected: 'red900',
+    approved: 'green900',
+  },
+  backgroundColors: {
+    pending: 'yellow100',
+    rejected: 'red100',
+    approved: 'green100',
+  },
+};
