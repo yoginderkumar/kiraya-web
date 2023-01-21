@@ -9,15 +9,22 @@ import {
   updateDoc,
   query,
   getDocs,
+  orderBy,
+  Timestamp,
 } from 'firebase/firestore';
-import { useFirestore } from 'reactfire';
+import { useCallback } from 'react';
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useFirestoreDocData,
+} from 'reactfire';
 
 export type Verification = {
   uid: string;
   status: 'pending' | 'approved' | 'rejected';
   productId: string;
-  creationAt: string;
-  updatedAt: string;
+  creationAt: Timestamp;
+  updatedAt: Timestamp;
   reasonsForRejection?: string[];
 };
 
@@ -29,6 +36,11 @@ function useVerificationRequestsCollection() {
 function useVerificationRequestsForProductCollection() {
   const store = useFirestore();
   return collection(store, 'Verification');
+}
+
+function useVerificationDocument(reqId: string) {
+  const usersCollection = useVerificationRequestsCollection();
+  return doc(usersCollection, reqId);
 }
 
 export function useCreateVerificationRequest() {
@@ -75,5 +87,53 @@ export function useUpdateVerificationRequestWithProduct() {
   }
   return {
     update,
+  };
+}
+
+export function useVerificationRequests() {
+  const requestsCollection = useVerificationRequestsCollection();
+  const requestsQuery = query(
+    requestsCollection,
+    orderBy('creationAt', 'desc')
+  );
+  const { data: requests } = useFirestoreCollectionData(requestsQuery, {
+    idField: 'id',
+  });
+
+  return {
+    requests,
+  };
+}
+
+export function useVerificationRequestById(reqId: string) {
+  const reqDoc = useVerificationDocument(reqId);
+  const { data: request } = useFirestoreDocData(reqDoc, {
+    idField: 'id',
+  });
+  return {
+    request,
+  };
+}
+
+export function useUpdateVerificationById(reqId: string) {
+  const reqDoc = useVerificationDocument(reqId);
+  const reject = useCallback(async (reasonsToReject: string[]) => {
+    await updateDoc(reqDoc, {
+      status: 'rejected',
+      reasonsForRejection: reasonsToReject,
+      updatedAt: serverTimestamp(),
+    });
+  }, []);
+
+  const approve = useCallback(async () => {
+    await updateDoc(reqDoc, {
+      status: 'approved',
+      updatedAt: serverTimestamp(),
+    });
+  }, []);
+
+  return {
+    reject,
+    approve,
   };
 }

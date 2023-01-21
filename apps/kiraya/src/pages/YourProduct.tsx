@@ -178,7 +178,6 @@ function EditProductForm({ product }: { product: Product }) {
             toast.success('Your changes are saved successfully!');
           } catch (e) {
             toast.error('Something went wrong!');
-            console.log(e);
           }
         })}
       >

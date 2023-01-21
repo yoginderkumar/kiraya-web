@@ -1,0 +1,7 @@
+{
+  "name": "kiraya-admin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/kiraya-admin/src",
+  "projectType": "application",
+  "tags": []
+}

@@ -25,6 +25,7 @@ import { TUser, useProfile } from '@kiraya/data-store/users';
 import { Optional } from 'utility-types';
 import { useFormik } from 'formik';
 import {
+  useUpdateVerificationById,
   useCreateVerificationRequest,
   useUpdateVerificationRequestWithProduct,
 } from './verification';
@@ -62,8 +63,10 @@ export type Product = {
     state: ProductCategory;
     pinCode: string;
   };
+  reviewStatus?: 'pending' | 'rejected' | 'approved';
   ownerInfo: Optional<TUser>;
   isFeatured?: boolean;
+  rejectDetails?: string[];
 };
 
 function useProductsCollection() {
@@ -348,15 +351,12 @@ export function useUpdateProduct(productId: string) {
         await updateVerification(productId);
         setProgress((prevValue) => prevValue + 5);
         if (files?.length) {
-          // Update the DOC
-          // console.log("Called: ", console.log('alled: ');)
           const images = await uploadImages(files, productId);
           batch.update(productDoc, {
             productMedia: product.productMedia
               ? [...product.productMedia, ...images]
               : [...images],
           });
-          console.log('Gel');
         }
         setProgress((prevValue) => prevValue + 5);
         await batch.commit();
@@ -428,7 +428,6 @@ export function useSearchProducts() {
     });
     if (params.type) {
       if (params.type === 'popular') {
-        console.log('Called: ', params.type);
         filteredProducts = filteredProducts.sort(
           (a, b) => (a.viewCount || 0) - (b.viewCount || 0)
         );
@@ -443,5 +442,49 @@ export function useSearchProducts() {
     hasAppliedFilters,
     handleParamsChange,
     setParamValue: setFieldValue,
+  };
+}
+
+export function useUpdateProductWithVerification(
+  productId: string,
+  reqId: string
+) {
+  const firebaseApp = useFirestore();
+  const productDoc = useProductDocument(productId);
+  const { reject, approve } = useUpdateVerificationById(reqId);
+  const rejectVerification = useCallback(async (reasonsToReject: string[]) => {
+    try {
+      const batch = writeBatch(firebaseApp);
+      batch.update(productDoc, {
+        isUnderReview: false,
+        reviewStatus: 'rejected',
+        rejectDetails: reasonsToReject,
+      });
+      await reject(reasonsToReject);
+      await batch.commit();
+    } catch (e) {
+      const err = e as Error;
+      throw new Error(err.message);
+    }
+  }, []);
+
+  const approveVerification = useCallback(async () => {
+    try {
+      const batch = writeBatch(firebaseApp);
+      batch.update(productDoc, {
+        isUnderReview: false,
+        reviewStatus: 'approved',
+      });
+      await approve();
+      await batch.commit();
+    } catch (e) {
+      const err = e as Error;
+      throw new Error(err.message);
+    }
+  }, []);
+
+  return {
+    rejectVerification,
+    approveVerification,
   };
 }

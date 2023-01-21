@@ -6,7 +6,6 @@ import {
   FormField,
   formikOnSubmitWithErrorHandling,
   getButtonClassName,
-  GoogleIcon,
   Inline,
   ModalBody,
   SpinnerIcon,
@@ -16,12 +15,12 @@ import {
 import { EmailValidator, PasswordValidator } from '@kiraya/util-general';
 import { Form, Formik } from 'formik';
 import toast from 'react-hot-toast';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import * as Validator from 'yup';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useProfile } from '@kiraya/data-store/users';
-import { UserProfileInModal } from '../../Auth';
 import { SideBanner } from '../../assets/images';
+import config from '../../config';
 
 export default function LoginPage() {
   const { user } = useProfile();
@@ -40,35 +39,7 @@ export default function LoginPage() {
     return searchParams.get('from');
   }, [searchParams]);
 
-  const [isNewUser, setIsNewUser] = useState<boolean>(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
-  const { loginUsingGoogle, loginUsingEmailPassword } = useLoginUser();
-  async function handleGoogleLogin() {
-    setIsGoogleLoading(true);
-    try {
-      const user = await loginUsingGoogle();
-      setIsGoogleLoading(false);
-
-      if (user === undefined) {
-        setIsNewUser(true);
-        return;
-      }
-
-      if (user !== undefined && user.uid) {
-        toast.success(`Logged in as ${user.displayName}`);
-        navigate(`/${userFrom || ''}`);
-        return;
-      }
-    } catch (e) {
-      const err = e as Error;
-      setIsGoogleLoading(false);
-      toast.error(err.message);
-    }
-  }
-
-  function profileCreated() {
-    navigate(`/${userFrom || ''}`);
-  }
+  const { loginUsingEmailPassword } = useLoginUser();
 
   return (
     <>
@@ -95,7 +66,7 @@ export default function LoginPage() {
           >
             <Box textAlign="center">
               <Text color="blue900" fontSize="xl" fontWeight="semibold">
-                Login Here
+                Kiraya Dashboard (Admin)
               </Text>
             </Box>
             <Formik
@@ -103,7 +74,10 @@ export default function LoginPage() {
               validateOnBlur={false}
               validateOnChange={false}
               validationSchema={Validator.object().shape({
-                email: EmailValidator.required(),
+                email: EmailValidator.required().oneOf(
+                  [config.adminEmail, null],
+                  'Only access to Kiraya staff or admins'
+                ),
                 password: PasswordValidator.required(),
               })}
               onSubmit={formikOnSubmitWithErrorHandling(async (values) => {
@@ -115,6 +89,7 @@ export default function LoginPage() {
                   if (user) {
                     toast.success(`Logged in as ${user.displayName}`);
                     navigate(`/${userFrom || ''}`);
+                    return;
                   }
                 } catch (e) {
                   const err = e as Error;
@@ -160,47 +135,11 @@ export default function LoginPage() {
                       level="primary"
                       size="lg"
                       type="submit"
-                      disabled={isSubmitting || isGoogleLoading}
+                      disabled={isSubmitting}
                     >
                       {isSubmitting ? <SpinnerIcon color="white" /> : null}{' '}
                       Login
                     </Button>
-                    <Inline textAlign="center" alignItems="center">
-                      <Box
-                        width="full"
-                        className="h-[1px]"
-                        backgroundColor="gray100"
-                      />
-                      <Text className="px-4">OR</Text>
-                      <Box
-                        width="full"
-                        className="h-[1px]"
-                        backgroundColor="gray100"
-                      />
-                    </Inline>
-                    <Button
-                      size="lg"
-                      onClick={handleGoogleLogin}
-                      disabled={isSubmitting || isGoogleLoading}
-                    >
-                      {isGoogleLoading ? (
-                        <SpinnerIcon />
-                      ) : (
-                        <>
-                          <GoogleIcon />
-                          Continue with google
-                        </>
-                      )}
-                    </Button>
-                    <Text fontSize="sm">
-                      Don't have an account yet?{' '}
-                      <Link
-                        to={`/signup?from=${userFrom}`}
-                        className={getButtonClassName({ inline: true })}
-                      >
-                        Click Here
-                      </Link>{' '}
-                    </Text>
                   </Stack>
                 </Form>
               )}
@@ -215,7 +154,6 @@ export default function LoginPage() {
           />
         </Box>
       </Inline>
-      <UserProfileInModal defaultState={isNewUser} onSuccess={profileCreated} />
     </>
   );
 }
