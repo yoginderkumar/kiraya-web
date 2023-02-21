@@ -99,7 +99,10 @@ export default function LoginPage() {
               </Text>
             </Box>
             <Formik
-              initialValues={{ email: '' as string, password: '' as string }}
+              initialValues={{
+                email: 'yoginder21@yopmail.com' as string,
+                password: 'Test@123' as string,
+              }}
               validateOnBlur={false}
               validateOnChange={false}
               validationSchema={Validator.object().shape({

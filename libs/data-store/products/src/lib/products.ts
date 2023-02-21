@@ -219,6 +219,7 @@ export function useCreateProduct() {
         await batch.commit();
       } catch (e) {
         const err = e as Error;
+        console.log('ee: ', err);
         throw new Error(err.message);
       }
     },
